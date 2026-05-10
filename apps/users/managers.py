@@ -27,5 +27,12 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("primary_role", "admin")
+        extra_fields.setdefault("status", "active")
+        extra_fields.setdefault("is_verified", True)
 
-        return self.create_user(phone, email, password, **extra_fields)
+        return self.create_user(
+            phone,
+            email,
+            password,
+            **extra_fields
+        )
