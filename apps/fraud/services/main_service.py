@@ -1,3 +1,4 @@
+from apps.auditlogs.services import AuditLogService
 from apps.fraud.models import FraudReport
 from apps.fraud.services.risk_engine import RiskEngine
 from apps.fraud.services.rules import FraudRules
@@ -33,5 +34,14 @@ class FraudService:
 
         if decision == "BLOCKED":
             raise Exception("Transaction blocked by fraud system")
-
+        AuditLogService.log(
+            user=user,
+            action="FRAUD_DECISION",
+            entity_type="Transaction",
+            entity_id=user.id,
+            metadata={
+                "score": score,
+                "decision": decision
+            }
+        )
         return report
