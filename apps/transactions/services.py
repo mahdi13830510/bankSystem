@@ -72,9 +72,14 @@ class TransactionService:
 
         AuditLogService.log(
             user=actor,
-            action="CARD_TRANSFER",
-            object_id=str(txn.id),
-            meta={"amount": str(amount)}
+            action="Card-Transfer",
+            entity_type="Transaction",
+            entity_id=txn.id,
+            ip=ip,
+            metadata={
+                "amount": str(amount),
+                "type": txn.type
+            }
         )
 
         NotificationService.send_sms(
@@ -120,10 +125,15 @@ class TransactionService:
 
         AuditLogService.log(
             user=actor,
-            action="IBAN_TRANSFER",
-            object_id=str(txn.id)
+            action="iBan-Transfer",
+            entity_type="Transaction",
+            entity_id=txn.id,
+            ip=ip,
+            metadata={
+                "amount": str(amount),
+                "type": txn.type
+            }
         )
-
         return txn
 
     @staticmethod
