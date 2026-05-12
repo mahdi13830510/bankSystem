@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 
 from apps.banks.models import Bank
 from .models import Account, AccountStatus
+from ..auditlogs.services import AuditLogService
 
 
 class AccountService:
@@ -59,8 +60,13 @@ class AccountService:
             currency=currency
         )
 
-        # auditlog hook from separate app
-        # AuditLogService.log(...)
+        AuditLogService.log(
+            user=user,
+            action="ACCOUNT",
+            entity_type="Account",
+            entity_id=account.id,
+            metadata={"change": "OPEN_ACCOUNT"}
+        )
 
         return account
 
@@ -75,6 +81,13 @@ class AccountService:
 
         account.balance += amount
         account.save(update_fields=["balance"])
+        AuditLogService.log(
+            user=account_id,
+            action="ACCOUNT",
+            entity_type="Account",
+            entity_id=account.id,
+            metadata={"change": "BALANCE_INCREASE"}
+        )
         return account
 
     @staticmethod
@@ -95,6 +108,7 @@ class AccountService:
 
         account.balance -= amount
         account.save(update_fields=["balance"])
+
         return account
 
     @staticmethod
@@ -112,6 +126,13 @@ class AccountService:
 
         account.blocked_balance += amount
         account.save(update_fields=["blocked_balance"])
+        AuditLogService.log(
+            user=account_id,
+            action="ACCOUNT",
+            entity_type="Account",
+            entity_id=account.id,
+            metadata={"change": "BALANCE_DECREASE"}
+        )
         return account
 
     @staticmethod
@@ -129,6 +150,13 @@ class AccountService:
 
         account.blocked_balance -= amount
         account.save(update_fields=["blocked_balance"])
+        AuditLogService.log(
+            user=account_id,
+            action="ACCOUNT",
+            entity_type="Account",
+            entity_id=account.id,
+            metadata={"change": "UNBLOCK_BALANCE"}
+        )
         return account
 
     @staticmethod
@@ -136,6 +164,13 @@ class AccountService:
         account = Account.objects.get(id=account_id)
         account.status = AccountStatus.BLOCKED
         account.save(update_fields=["status"])
+        AuditLogService.log(
+            user=account_id,
+            action="ACCOUNT",
+            entity_type="Account",
+            entity_id=account.id,
+            metadata={"status": "FREEZE"}
+        )
         return account
 
     @staticmethod
@@ -143,6 +178,13 @@ class AccountService:
         account = Account.objects.get(id=account_id)
         account.status = AccountStatus.ACTIVE
         account.save(update_fields=["status"])
+        AuditLogService.log(
+            user=account_id,
+            action="ACCOUNT",
+            entity_type="Account",
+            entity_id=account.id,
+            metadata={"status": "ACTIVATE"}
+        )
         return account
 
     @staticmethod
@@ -154,4 +196,11 @@ class AccountService:
 
         account.status = AccountStatus.CLOSED
         account.save(update_fields=["status"])
+        AuditLogService.log(
+            user=account_id,
+            action="ACCOUNT",
+            entity_type="Account",
+            entity_id=account.id,
+            metadata={"status": "CLOSE"}
+        )
         return account
