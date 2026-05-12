@@ -1,23 +1,43 @@
 from rest_framework.permissions import BasePermission
 
 
-class IsAdminOrBankStaff(BasePermission):
+class IsAuthenticatedBankUser(BasePermission):
     def has_permission(self, request, view):
-        user = request.user
+        return bool(request.user and request.user.is_authenticated)
+
+
+class IsAdmin(BasePermission):
+    def has_permission(self, request, view):
         return bool(
-            user and user.is_authenticated and (
-                getattr(user, "role", None) in ["admin", "bank_manager", "bank_employee"]
-                or user.is_staff
-                or user.is_superuser
+            request.user and request.user.is_authenticated and (
+                    request.user.is_superuser
+                    or request.user.is_staff
+                    or getattr(request.user, "role", None) == "admin"
             )
         )
 
 
-class IsOwnerOrAdminOrBankStaff(BasePermission):
+class IsBankStaff(BasePermission):
+    def has_permission(self, request, view):
+        return bool(getattr(request.user, "role", None) in ["bank_manager", "bank_employee"])
+
+
+class BankScopePermission(BasePermission):
+
     def has_object_permission(self, request, view, obj):
         user = request.user
-        if user.is_superuser or user.is_staff:
+
+        if request.user.is_superuser or request.user.is_staff or getattr(user, "role", None) == "admin":
             return True
-        if getattr(user, "role", None) in ["admin", "bank_manager", "bank_employee"]:
-            return True
-        return obj.customer_id == user.id
+
+        user_bank = getattr(user, "bank", None)
+        if user_bank is None and hasattr(user, "profile"):
+            user_bank = getattr(user.profile, "bank", None)
+
+        if getattr(user, "role", None) in ["bank_manager", "bank_employee"]:
+            return obj.bank_id == getattr(user_bank, "id", None)
+
+        if getattr(user, "role", None) == "customer":
+            return obj.customer_id == user.id
+
+        return False
