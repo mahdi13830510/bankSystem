@@ -1,3 +1,5 @@
+# apps/accounts/models.py
+
 from django.db import models
 from django.conf import settings
 from apps.banks.models import Bank
@@ -10,9 +12,9 @@ class AccountType(models.TextChoices):
 
 
 class CurrencyType(models.TextChoices):
-    TRY = "TRY", "Turkish Lira"
-    USD = "USD", "Dollar"
-    EUR = "EUR", "Euro"
+    TRY = "TRY", "TRY"
+    USD = "USD", "USD"
+    EUR = "EUR", "EUR"
 
 
 class AccountStatus(models.TextChoices):
@@ -27,7 +29,6 @@ class Account(models.Model):
         on_delete=models.CASCADE,
         related_name="accounts"
     )
-
     bank = models.ForeignKey(
         Bank,
         on_delete=models.PROTECT,
@@ -53,6 +54,10 @@ class Account(models.Model):
 
     class Meta:
         db_table = "accounts_account"
+        ordering = ["-id"]
+
+    def __str__(self):
+        return f"{self.account_number}"
 
     @property
     def available_balance(self):
