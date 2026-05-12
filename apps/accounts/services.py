@@ -1,125 +1,172 @@
+import random
+from decimal import Decimal
 from django.db import transaction
-from django.utils import timezone
-from .models import Account, AccountStatus, AccountOwnershipHistory
-from .exceptions import InsufficientBalanceError, InvalidAmountError
-from apps.transactions.services import create_financial_entry
-from apps.transactions.models import TransactionType
+from django.core.exceptions import ValidationError
+
+from apps.banks.models import Bank
+from .models import Account, AccountStatus
 
 
-@transaction.atomic
-def create_account(customer, bank, account_type, currency, initial_balance=0, created_by=None):
-    from .generators import generate_account_number, generate_iban
-    from .validators import validate_unique_account_type_per_bank_customer
+class AccountService:
 
-    validate_unique_account_type_per_bank_customer(customer, bank, account_type)
+    # -----------------------------
+    # GENERATORS
+    # -----------------------------
 
-    account = Account.objects.create(
-        customer=customer,
-        bank=bank,
-        type=account_type,
-        currency=currency,
-        account_number=generate_account_number(),
-        iban=generate_iban(getattr(bank, "bank_code", "IR")),
-        balance=initial_balance,
-        blocked_balance=0,
-        status=AccountStatus.ACTIVE,
-    )
-    return account
+    @staticmethod
+    def generate_account_number():
+        while True:
+            value = "".join(random.choices("0123456789", k=16))
+            if not Account.objects.filter(account_number=value).exists():
+                return value
 
+    @staticmethod
+    def generate_iban():
+        while True:
+            body = "".join(random.choices("0123456789", k=24))
+            iban = f"TR{body}"
+            if not Account.objects.filter(iban=iban).exists():
+                return iban
 
-@transaction.atomic
-def freeze_account(account: Account):
-    account.status = AccountStatus.FROZEN
-    account.save(update_fields=["status"])
-    return account
+    # -----------------------------
+    # CREATE
+    # -----------------------------
 
+    @staticmethod
+    def open_account(user, bank_id, type, currency):
+        bank = Bank.objects.get(id=bank_id)
 
-@transaction.atomic
-def unfreeze_account(account: Account):
-    account.status = AccountStatus.ACTIVE
-    account.save(update_fields=["status"])
-    return account
+        account = Account.objects.create(
+            customer=user,
+            bank=bank,
+            account_number=AccountService.generate_account_number(),
+            iban=AccountService.generate_iban(),
+            type=type,
+            currency=currency
+        )
 
+        # auditlog hook
+        # AuditLogService.log(...)
 
-@transaction.atomic
-def soft_delete_account(account: Account):
-    account.soft_delete()
-    return account
+        return account
 
+    # -----------------------------
+    # READ
+    # -----------------------------
 
-@transaction.atomic
-def deposit(account: Account, amount, performed_by, reference=None, description="Deposit"):
-    if amount <= 0:
-        raise InvalidAmountError("Amount must be positive.")
+    @staticmethod
+    def my_accounts(user):
+        return Account.objects.filter(customer=user)
 
-    account.balance += amount
-    account.save(update_fields=["balance"])
+    @staticmethod
+    def get_owned(user, account_id):
+        return Account.objects.get(id=account_id, customer=user)
 
-    tx = create_financial_entry(
-        destination_account=account,
-        amount=amount,
-        transaction_type=TransactionType.CREDIT,
-        performed_by=performed_by,
-        description=description,
-        reference=reference,
-    )
-    return account, tx
+    @staticmethod
+    def get_admin(account_id):
+        return Account.objects.get(id=account_id)
 
+    # -----------------------------
+    # MONEY OPS
+    # -----------------------------
 
-@transaction.atomic
-def withdraw(account: Account, amount, performed_by, reference=None, description="Withdraw"):
-    if amount <= 0:
-        raise InvalidAmountError("Amount must be positive.")
-    if account.available_balance < amount:
-        raise InsufficientBalanceError("Insufficient available balance.")
+    @staticmethod
+    @transaction.atomic
+    def deposit(account_id, amount):
+        acc = Account.objects.select_for_update().get(id=account_id)
 
-    account.balance -= amount
-    account.save(update_fields=["balance"])
+        acc.balance += Decimal(amount)
+        acc.save(update_fields=["balance"])
 
-    tx = create_financial_entry(
-        source_account=account,
-        amount=amount,
-        transaction_type=TransactionType.DEBIT,
-        performed_by=performed_by,
-        description=description,
-        reference=reference,
-    )
-    return account, tx
+        return acc
 
+    @staticmethod
+    @transaction.atomic
+    def withdraw(account_id, amount):
+        acc = Account.objects.select_for_update().get(id=account_id)
 
-@transaction.atomic
-def block_amount(account: Account, amount):
-    if amount <= 0:
-        raise InvalidAmountError("Amount must be positive.")
-    if account.available_balance < amount:
-        raise InsufficientBalanceError("Insufficient available balance.")
-    account.blocked_balance += amount
-    account.save(update_fields=["blocked_balance"])
-    return account
+        amount = Decimal(amount)
 
+        if acc.status != AccountStatus.ACTIVE:
+            raise ValidationError("Account blocked")
 
-@transaction.atomic
-def unblock_amount(account: Account, amount):
-    if amount <= 0:
-        raise InvalidAmountError("Amount must be positive.")
-    if account.blocked_balance < amount:
-        raise InsufficientBalanceError("Blocked balance is not enough.")
-    account.blocked_balance -= amount
-    account.save(update_fields=["blocked_balance"])
-    return account
+        if acc.available_balance < amount:
+            raise ValidationError("Insufficient balance")
 
+        acc.balance -= amount
+        acc.save(update_fields=["balance"])
 
-@transaction.atomic
-def change_account_owner(account: Account, new_customer, changed_by, note=""):
-    old_customer = account.customer
-    account.customer = new_customer
-    account.save(update_fields=["customer"])
+        return acc
 
-    AccountOwnershipHistory.objects.create(
-        account=account,
-        old_customer=old_customer,
-        new_customer=new_customer,
-        changed_by=changed_by,
-        note=note,
-    )
-    return account
+    @staticmethod
+    @transaction.atomic
+    def block_amount(account_id, amount):
+        acc = Account.objects.select_for_update().get(id=account_id)
+
+        amount = Decimal(amount)
+
+        if acc.available_balance < amount:
+            raise ValidationError("Insufficient available balance")
+
+        acc.blocked_balance += amount
+        acc.save(update_fields=["blocked_balance"])
+
+        return acc
+
+    @staticmethod
+    @transaction.atomic
+    def unblock_amount(account_id, amount):
+        acc = Account.objects.select_for_update().get(id=account_id)
+
+        amount = Decimal(amount)
+
+        if acc.blocked_balance < amount:
+            raise ValidationError("Blocked balance too low")
+
+        acc.blocked_balance -= amount
+        acc.save(update_fields=["blocked_balance"])
+
+        return acc
+
+    # -----------------------------
+    # STATUS OPS
+    # -----------------------------
+
+    @staticmethod
+    def freeze(account_id):
+        acc = Account.objects.get(id=account_id)
+        acc.status = AccountStatus.BLOCKED
+        acc.save(update_fields=["status"])
+        return acc
+
+    @staticmethod
+    def close(account_id):
+        acc = Account.objects.get(id=account_id)
+
+        if acc.balance > 0:
+            raise ValidationError("Balance must be zero")
+
+        acc.status = AccountStatus.CLOSED
+        acc.save(update_fields=["status"])
+
+        return acc
+
+    # -----------------------------
+    # INTEGRATION
+    # -----------------------------
+
+    @staticmethod
+    def transaction_debit(account_id, amount):
+        return AccountService.withdraw(account_id, amount)
+
+    @staticmethod
+    def transaction_credit(account_id, amount):
+        return AccountService.deposit(account_id, amount)
+
+    @staticmethod
+    def reserve_installment(account_id, amount):
+        return AccountService.block_amount(account_id, amount)
+
+    @staticmethod
+    def pay_installment(account_id, amount):
+        return AccountService.withdraw(account_id, amount)
