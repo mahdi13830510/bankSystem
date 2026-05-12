@@ -2,6 +2,8 @@ from django.db import transaction
 from django.utils import timezone
 from .models import Account, AccountStatus, AccountOwnershipHistory
 from .exceptions import InsufficientBalanceError, InvalidAmountError
+from apps.transactions.services import create_financial_entry
+from apps.transactions.models import TransactionType
 
 
 @transaction.atomic
@@ -46,23 +48,43 @@ def soft_delete_account(account: Account):
 
 
 @transaction.atomic
-def deposit(account: Account, amount, reference=None):
+def deposit(account: Account, amount, performed_by, reference=None, description="Deposit"):
     if amount <= 0:
         raise InvalidAmountError("Amount must be positive.")
+
     account.balance += amount
     account.save(update_fields=["balance"])
-    return account
+
+    tx = create_financial_entry(
+        destination_account=account,
+        amount=amount,
+        transaction_type=TransactionType.CREDIT,
+        performed_by=performed_by,
+        description=description,
+        reference=reference,
+    )
+    return account, tx
 
 
 @transaction.atomic
-def withdraw(account: Account, amount, reference=None):
+def withdraw(account: Account, amount, performed_by, reference=None, description="Withdraw"):
     if amount <= 0:
         raise InvalidAmountError("Amount must be positive.")
     if account.available_balance < amount:
         raise InsufficientBalanceError("Insufficient available balance.")
+
     account.balance -= amount
     account.save(update_fields=["balance"])
-    return account
+
+    tx = create_financial_entry(
+        source_account=account,
+        amount=amount,
+        transaction_type=TransactionType.DEBIT,
+        performed_by=performed_by,
+        description=description,
+        reference=reference,
+    )
+    return account, tx
 
 
 @transaction.atomic
