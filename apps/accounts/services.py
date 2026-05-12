@@ -1,3 +1,5 @@
+# apps/accounts/services.py
+
 import random
 from decimal import Decimal
 from django.db import transaction
@@ -8,10 +10,6 @@ from .models import Account, AccountStatus
 
 
 class AccountService:
-
-    # -----------------------------
-    # GENERATORS
-    # -----------------------------
 
     @staticmethod
     def generate_account_number():
@@ -28,9 +26,25 @@ class AccountService:
             if not Account.objects.filter(iban=iban).exists():
                 return iban
 
-    # -----------------------------
-    # CREATE
-    # -----------------------------
+    @staticmethod
+    def my_accounts(user):
+        return Account.objects.filter(customer=user)
+
+    @staticmethod
+    def get_owned(user, account_id):
+        return Account.objects.get(id=account_id, customer=user)
+
+    @staticmethod
+    def get_by_id(account_id):
+        return Account.objects.get(id=account_id)
+
+    @staticmethod
+    def get_by_number(account_number):
+        return Account.objects.get(account_number=account_number)
+
+    @staticmethod
+    def get_by_iban(iban):
+        return Account.objects.get(iban=iban)
 
     @staticmethod
     def open_account(user, bank_id, type, currency):
@@ -45,128 +59,99 @@ class AccountService:
             currency=currency
         )
 
-        # auditlog hook
+        # auditlog hook from separate app
         # AuditLogService.log(...)
 
         return account
 
-    # -----------------------------
-    # READ
-    # -----------------------------
-
     @staticmethod
-    def my_accounts(user):
-        return Account.objects.filter(customer=user)
+    @transaction.atomic
+    def increase_balance(account_id, amount):
+        account = Account.objects.select_for_update().get(id=account_id)
 
-    @staticmethod
-    def get_owned(user, account_id):
-        return Account.objects.get(id=account_id, customer=user)
+        amount = Decimal(amount)
+        if amount <= 0:
+            raise ValidationError("Invalid amount")
 
-    @staticmethod
-    def get_admin(account_id):
-        return Account.objects.get(id=account_id)
-
-    # -----------------------------
-    # MONEY OPS
-    # -----------------------------
+        account.balance += amount
+        account.save(update_fields=["balance"])
+        return account
 
     @staticmethod
     @transaction.atomic
-    def deposit(account_id, amount):
-        acc = Account.objects.select_for_update().get(id=account_id)
-
-        acc.balance += Decimal(amount)
-        acc.save(update_fields=["balance"])
-
-        return acc
-
-    @staticmethod
-    @transaction.atomic
-    def withdraw(account_id, amount):
-        acc = Account.objects.select_for_update().get(id=account_id)
+    def decrease_balance(account_id, amount):
+        account = Account.objects.select_for_update().get(id=account_id)
 
         amount = Decimal(amount)
 
-        if acc.status != AccountStatus.ACTIVE:
-            raise ValidationError("Account blocked")
+        if amount <= 0:
+            raise ValidationError("Invalid amount")
 
-        if acc.available_balance < amount:
+        if account.status != AccountStatus.ACTIVE:
+            raise ValidationError("Account is not active")
+
+        if account.available_balance < amount:
             raise ValidationError("Insufficient balance")
 
-        acc.balance -= amount
-        acc.save(update_fields=["balance"])
-
-        return acc
+        account.balance -= amount
+        account.save(update_fields=["balance"])
+        return account
 
     @staticmethod
     @transaction.atomic
-    def block_amount(account_id, amount):
-        acc = Account.objects.select_for_update().get(id=account_id)
+    def block_balance(account_id, amount):
+        account = Account.objects.select_for_update().get(id=account_id)
 
         amount = Decimal(amount)
 
-        if acc.available_balance < amount:
+        if amount <= 0:
+            raise ValidationError("Invalid amount")
+
+        if account.available_balance < amount:
             raise ValidationError("Insufficient available balance")
 
-        acc.blocked_balance += amount
-        acc.save(update_fields=["blocked_balance"])
-
-        return acc
+        account.blocked_balance += amount
+        account.save(update_fields=["blocked_balance"])
+        return account
 
     @staticmethod
     @transaction.atomic
-    def unblock_amount(account_id, amount):
-        acc = Account.objects.select_for_update().get(id=account_id)
+    def unblock_balance(account_id, amount):
+        account = Account.objects.select_for_update().get(id=account_id)
 
         amount = Decimal(amount)
 
-        if acc.blocked_balance < amount:
-            raise ValidationError("Blocked balance too low")
+        if amount <= 0:
+            raise ValidationError("Invalid amount")
 
-        acc.blocked_balance -= amount
-        acc.save(update_fields=["blocked_balance"])
+        if account.blocked_balance < amount:
+            raise ValidationError("Blocked balance insufficient")
 
-        return acc
-
-    # -----------------------------
-    # STATUS OPS
-    # -----------------------------
+        account.blocked_balance -= amount
+        account.save(update_fields=["blocked_balance"])
+        return account
 
     @staticmethod
     def freeze(account_id):
-        acc = Account.objects.get(id=account_id)
-        acc.status = AccountStatus.BLOCKED
-        acc.save(update_fields=["status"])
-        return acc
+        account = Account.objects.get(id=account_id)
+        account.status = AccountStatus.BLOCKED
+        account.save(update_fields=["status"])
+        return account
+
+    @staticmethod
+    def activate(account_id):
+        account = Account.objects.get(id=account_id)
+        account.status = AccountStatus.ACTIVE
+        account.save(update_fields=["status"])
+        return account
 
     @staticmethod
     def close(account_id):
-        acc = Account.objects.get(id=account_id)
+        account = Account.objects.get(id=account_id)
 
-        if acc.balance > 0:
+        if account.balance > 0:
             raise ValidationError("Balance must be zero")
 
-        acc.status = AccountStatus.CLOSED
-        acc.save(update_fields=["status"])
-
-        return acc
-
-    # -----------------------------
-    # INTEGRATION
-    # -----------------------------
-
-    @staticmethod
-    def transaction_debit(account_id, amount):
-        return AccountService.withdraw(account_id, amount)
-
-    @staticmethod
-    def transaction_credit(account_id, amount):
-        return AccountService.deposit(account_id, amount)
-
-    @staticmethod
-    def reserve_installment(account_id, amount):
-        return AccountService.block_amount(account_id, amount)
-
-    @staticmethod
-    def pay_installment(account_id, amount):
-        return AccountService.withdraw(account_id, amount)
+        account.status = AccountStatus.CLOSED
+        account.save(update_fields=["status"])
+        return account
