@@ -8,6 +8,7 @@ from datetime import timedelta
 from apps.users.models import User
 from .models import Session, OTPCode
 
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 
 class AuthService:
 
@@ -25,8 +26,7 @@ class AuthService:
         if not user.check_password(password):
             user.failed_login_attempts += 1
             user.save()
-            raise Exception("Wrong password")
-
+            raise AuthenticationFailed("Wrong password")
         user.failed_login_attempts = 0
         user.save()
 
@@ -52,7 +52,7 @@ class AuthService:
         ).last()
 
         if not otp:
-            raise Exception("Invalid OTP")
+            raise ValidationError("Invalid OTP")
 
         if otp.expires_at < timezone.now():
             raise Exception("OTP expired")

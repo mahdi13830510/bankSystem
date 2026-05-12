@@ -1,9 +1,15 @@
+from django.utils import timezone
+from datetime import timedelta
 from django.db import models
 from django.conf import settings
 
 
-class Session(models.Model):
+def get_default_session_expiry():
+    minutes = getattr(settings, 'SESSION_EXPIRATION_MINUTES', 10)
+    return timezone.now() + timedelta(minutes=minutes)
 
+
+class Session(models.Model):
     class Status(models.TextChoices):
         ACTIVE = "active", "Active"
         EXPIRED = "expired", "Expired"
@@ -31,7 +37,7 @@ class Session(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    expires_at = models.DateTimeField()
+    expires_at = models.DateTimeField(default=get_default_session_expiry)
 
     last_used = models.DateTimeField(auto_now=True)
 
@@ -39,8 +45,11 @@ class Session(models.Model):
         return f"{self.user.phone} - {self.device_name}"
 
 
-class OTPCode(models.Model):
+def get_expiry_time():
+    return timezone.now() + timedelta(minutes=2)
 
+
+class OTPCode(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
@@ -50,6 +59,6 @@ class OTPCode(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    expires_at = models.DateTimeField()
+    expires_at = models.DateTimeField(default=get_expiry_time)
 
     is_used = models.BooleanField(default=False)
