@@ -1,94 +1,24 @@
 from rest_framework import serializers
-from .models import Account, AccountOwnershipHistory
-from .validators import validate_unique_account_type_per_bank_customer
+from .models import Account
 
 
 class AccountSerializer(serializers.ModelSerializer):
-    available_balance = serializers.DecimalField(max_digits=18, decimal_places=2, read_only=True)
+    available_balance = serializers.DecimalField(
+        max_digits=18,
+        decimal_places=2,
+        read_only=True
+    )
 
     class Meta:
         model = Account
-        fields = [
-            "id", "customer", "bank", "account_number", "iban", "type",
-            "currency", "balance", "blocked_balance", "available_balance",
-            "status", "created_at", "deleted_at",
-        ]
-        read_only_fields = ["id", "account_number", "iban", "created_at", "deleted_at", "available_balance"]
-
-    def validate(self, attrs):
-        instance = getattr(self, "instance", None)
-        customer = attrs.get("customer", getattr(instance, "customer", None))
-        bank = attrs.get("bank", getattr(instance, "bank", None))
-        account_type = attrs.get("type", getattr(instance, "type", None))
-
-        if customer and bank and account_type:
-            validate_unique_account_type_per_bank_customer(customer, bank, account_type, instance=instance)
-
-        balance = attrs.get("balance", getattr(instance, "balance", 0))
-        blocked_balance = attrs.get("blocked_balance", getattr(instance, "blocked_balance", 0))
-        if blocked_balance > balance:
-            raise serializers.ValidationError("blocked_balance cannot be greater than balance.")
-
-        return attrs
+        fields = "__all__"
 
 
-class AccountDetailSerializer(serializers.ModelSerializer):
-    available_balance = serializers.SerializerMethodField()
-    bank_name = serializers.CharField(source="bank.name", read_only=True)
-    customer_name = serializers.CharField(source="customer.get_full_name", read_only=True)
-    customer_id = serializers.IntegerField(source="customer.id", read_only=True)
-
-    class Meta:
-        model = Account
-        fields = [
-            "id",
-            "customer_id",
-            "customer_name",
-            "bank",
-            "bank_name",
-            "account_number",
-            "iban",
-            "type",
-            "currency",
-            "balance",
-            "blocked_balance",
-            "available_balance",
-            "status",
-            "created_at",
-            "deleted_at",
-        ]
-        read_only_fields = fields
-
-    def get_available_balance(self, obj):
-        return obj.balance - obj.blocked_balance
-
-
-class AccountCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Account
-        fields = ["customer", "bank", "type", "currency", "balance"]
-
-    def validate(self, attrs):
-        validate_unique_account_type_per_bank_customer(
-            attrs["customer"], attrs["bank"], attrs["type"]
-        )
-        return attrs
-
-
-class FreezeUnfreezeSerializer(serializers.Serializer):
-    reason = serializers.CharField(required=False, allow_blank=True)
+class OpenAccountSerializer(serializers.Serializer):
+    bank_id = serializers.IntegerField()
+    type = serializers.CharField()
+    currency = serializers.CharField()
 
 
 class AmountSerializer(serializers.Serializer):
-    amount = serializers.DecimalField(max_digits=18, decimal_places=2, min_value=0.01)
-
-
-class ChangeOwnerSerializer(serializers.Serializer):
-    new_customer = serializers.IntegerField()
-    note = serializers.CharField(required=False, allow_blank=True)
-
-
-class OwnershipHistorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AccountOwnershipHistory
-        fields = "__all__"
+    amount = serializers.DecimalField(max_digits=18, decimal_places=2)
