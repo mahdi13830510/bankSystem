@@ -13,7 +13,6 @@ from .services import AuthService
 class LoginView(APIView):
 
     def post(self, request):
-
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -32,7 +31,6 @@ class LoginView(APIView):
 class VerifyOTPView(APIView):
 
     def post(self, request):
-
         serializer = VerifyOTPSerializer(
             data=request.data
         )
@@ -41,8 +39,8 @@ class VerifyOTPView(APIView):
         access, refresh = AuthService.verify_otp(
             serializer.validated_data["phone"],
             serializer.validated_data["code"],
-            request.META.get("REMOTE_ADDR"),
-            request.META.get("HTTP_USER_AGENT")
+            request.META.get("REMOTE_ADDR", "127.0.0.1"),
+            request.META.get("HTTP_USER_AGENT", "Unknown Device")
         )
 
         return Response({
@@ -54,7 +52,6 @@ class VerifyOTPView(APIView):
 class LogoutView(APIView):
 
     def post(self, request):
-
         token = request.data["refresh_token"]
 
         AuthService.logout(token)

@@ -25,7 +25,7 @@ class Session(models.Model):
 
     refresh_token = models.TextField()
 
-    device_name = models.CharField(max_length=255)
+    device_name = models.CharField(max_length=255,default="Unknown")
 
     ip_address = models.GenericIPAddressField()
 
