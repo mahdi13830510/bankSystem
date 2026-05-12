@@ -8,7 +8,6 @@ from .services import UserService
 class RegisterView(APIView):
 
     def post(self, request):
-
         serializer = RegisterSerializer(
             data=request.data
         )
