@@ -11,7 +11,30 @@ class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = "__all__"
+        fields = [
+            "id",
+            "customer",
+            "bank",
+            "account_number",
+            "iban",
+            "type",
+            "currency",
+            "balance",
+            "blocked_balance",
+            "available_balance",
+            "status",
+            "created_at",
+        ]
+        read_only_fields = [
+            "id",
+            "customer",
+            "account_number",
+            "iban",
+            "balance",
+            "blocked_balance",
+            "status",
+            "created_at",
+        ]
 
 
 class OpenAccountSerializer(serializers.Serializer):
