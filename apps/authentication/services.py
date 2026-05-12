@@ -10,6 +10,9 @@ from .models import Session, OTPCode
 
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 
+from ..auditlogs.services import AuditLogService
+
+
 class AuthService:
 
     @staticmethod
@@ -26,9 +29,23 @@ class AuthService:
         if not user.check_password(password):
             user.failed_login_attempts += 1
             user.save()
+            AuditLogService.log(
+                user=None,
+                action="LOGIN",
+                entity_type="AUTH",
+                entity_id=user.phone,
+                metadata={"status": "FAILED"}
+            )
             raise AuthenticationFailed("Wrong password")
         user.failed_login_attempts = 0
         user.save()
+        AuditLogService.log(
+            user=user,
+            action="LOGIN",
+            entity_type="Session",
+            entity_id=user.session.id,
+            metadata={"status": "SUCCESS"}
+        )
 
         code = str(random.randint(100000, 999999))
 
@@ -52,13 +69,34 @@ class AuthService:
         ).last()
 
         if not otp:
+            AuditLogService.log(
+                user=user,
+                action="LOGIN",
+                entity_type="OTP",
+                entity_id=user.session.id,
+                metadata={"otp_verified": False}
+            )
             raise ValidationError("Invalid OTP")
 
         if otp.expires_at < timezone.now():
+            AuditLogService.log(
+                user=user,
+                action="LOGIN",
+                entity_type="OTP",
+                entity_id=user.session.id,
+                metadata={"otp_verified": False}
+            )
             raise Exception("OTP expired")
 
         otp.is_used = True
         otp.save()
+        AuditLogService.log(
+            user=user,
+            action="LOGIN",
+            entity_type="OTP",
+            entity_id=user.session.id,
+            metadata={"otp_verified": True}
+        )
 
         access = jwt.encode(
             {"user_id": user.id},
