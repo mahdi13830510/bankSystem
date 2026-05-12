@@ -32,6 +32,37 @@ class AccountSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class AccountDetailSerializer(serializers.ModelSerializer):
+    available_balance = serializers.SerializerMethodField()
+    bank_name = serializers.CharField(source="bank.name", read_only=True)
+    customer_name = serializers.CharField(source="customer.get_full_name", read_only=True)
+    customer_id = serializers.IntegerField(source="customer.id", read_only=True)
+
+    class Meta:
+        model = Account
+        fields = [
+            "id",
+            "customer_id",
+            "customer_name",
+            "bank",
+            "bank_name",
+            "account_number",
+            "iban",
+            "type",
+            "currency",
+            "balance",
+            "blocked_balance",
+            "available_balance",
+            "status",
+            "created_at",
+            "deleted_at",
+        ]
+        read_only_fields = fields
+
+    def get_available_balance(self, obj):
+        return obj.balance - obj.blocked_balance
+
+
 class AccountCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
