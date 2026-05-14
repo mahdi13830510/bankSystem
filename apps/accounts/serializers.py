@@ -24,6 +24,8 @@ class AccountSerializer(serializers.ModelSerializer):
             "available_balance",
             "status",
             "created_at",
+            "loan_blocked_balance",
+            "is_primary"
         ]
         read_only_fields = [
             "id",

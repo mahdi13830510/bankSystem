@@ -204,3 +204,24 @@ class AccountService:
             metadata={"status": "CLOSE"}
         )
         return account
+
+    @staticmethod
+    def get_primary_account(user):
+        return Account.objects.get(
+            customer=user,
+            is_primary=True,
+            status="ACTIVE"
+        )
+
+    @staticmethod
+    def block_for_loan(account, amount):
+        account.loan_blocked_balance += amount
+        account.save(update_fields=["loan_blocked_balance"])
+
+    @staticmethod
+    def unblock_loan(account, amount):
+        account.loan_blocked_balance -= amount
+        if account.loan_blocked_balance < 0:
+            account.loan_blocked_balance = 0
+
+        account.save(update_fields=["loan_blocked_balance"])

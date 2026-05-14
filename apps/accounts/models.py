@@ -43,6 +43,11 @@ class Account(models.Model):
 
     balance = models.DecimalField(max_digits=18, decimal_places=2, default=0)
     blocked_balance = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    loan_blocked_balance = models.DecimalField(
+        max_digits=18,
+        decimal_places=2,
+        default=0
+    )
 
     status = models.CharField(
         max_length=20,
@@ -51,7 +56,7 @@ class Account(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
-
+    is_primary = models.BooleanField(default=False)
     class Meta:
         db_table = "accounts_account"
         ordering = ["-id"]
