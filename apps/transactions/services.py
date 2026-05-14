@@ -133,3 +133,39 @@ class TransactionService:
     @staticmethod
     def get_statement(account):
         return Transaction.objects.filter(account=account)
+
+    @staticmethod
+    def loan_disbursement(account, amount, loan):
+
+        return Transaction.objects.create(
+            account=account,
+            amount=amount,
+            fee=0,
+            type="LOAN_DISBURSEMENT",
+            status="SUCCESS",
+            description=f"Loan #{loan.id}"
+        )
+
+    @staticmethod
+    def installment_payment(account, amount, installment):
+
+        return Transaction.objects.create(
+            account=account,
+            amount=amount,
+            fee=0,
+            type="INSTALLMENT_PAYMENT",
+            status="SUCCESS",
+            description=f"Installment #{installment.id}"
+        )
+
+    @staticmethod
+    def late_fee(account, amount, loan):
+
+        return Transaction.objects.create(
+            account=account,
+            amount=amount,
+            fee=0,
+            type="LATE_FEE",
+            status="SUCCESS",
+            description=f"Loan penalty #{loan.id}"
+        )

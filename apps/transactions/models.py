@@ -11,6 +11,8 @@ class TransactionType(models.TextChoices):
     CASH_WITHDRAW = "CASH_WITHDRAW", "Cash Withdraw"
     LOAN_DISBURSEMENT = "LOAN_DISBURSEMENT", "Loan Disbursement"
     INSTALLMENT_PAYMENT = "INSTALLMENT_PAYMENT", "Installment Payment"
+    LATE_FEE = "LATE_FEE"
+    LOAN_SETTLEMENT = "LOAN_SETTLEMENT"
     REFUND = "REFUND", "Refund"
 
 
