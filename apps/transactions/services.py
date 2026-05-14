@@ -26,12 +26,6 @@ class TransactionService:
         return str(uuid.uuid4()).replace("-", "")[:24]
 
     @staticmethod
-    def calculate_fee(amount):
-        if amount <= Decimal("1000"):
-            return Decimal("1")
-        return Decimal("5")
-
-    @staticmethod
     @db_transaction.atomic
     def card_transfer(*, actor, source, destination, amount, ip, description=""):
 
@@ -48,7 +42,7 @@ class TransactionService:
             amount=amount
         )
 
-        fee = TransactionService.calculate_fee(amount)
+        fee = destination.bank.transfer_fee
         total = amount + fee
 
         if source.balance < total:
