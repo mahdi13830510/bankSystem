@@ -4,11 +4,12 @@ from django.db import transaction
 from .models import LoanRequest, Loan, LoanRequestStatus
 from .calculators import LoanCalculator
 
-from apps.auditlog.services import AuditLogService
+from apps.auditlogs.services import AuditLogService
 from apps.notifications.services import NotificationService
 from apps.installments.services import InstallmentService
 from apps.accounts.models import Account
-
+from apps.accounts.services import AccountService
+from apps.transactions.services import TransactionService
 
 class LoanService:
 
@@ -70,6 +71,16 @@ class LoanService:
             total_payable=total,
             monthly_installment=monthly,
             duration_months=req.duration_months
+        )
+        account = AccountService.get_primary_account(req.customer)
+
+        account.balance += req.amount
+        account.save(update_fields=["balance"])
+
+        TransactionService.loan_disbursement(
+            account=account,
+            amount=req.amount,
+            loan=loan
         )
 
         req.status = LoanRequestStatus.APPROVED
