@@ -60,12 +60,9 @@ class AccountService:
             currency=currency
         )
 
-        AuditLogService.log(
-            user=user,
-            action="ACCOUNT",
-            entity_type="Account",
-            entity_id=account.id,
-            metadata={"change": "OPEN_ACCOUNT"}
+        AuditLogService.info(
+            actor=user,
+            action="ACCOUNT_CREATED"
         )
 
         return account
@@ -81,13 +78,11 @@ class AccountService:
 
         account.balance += amount
         account.save(update_fields=["balance"])
-        AuditLogService.log(
-            user=account_id,
-            action="ACCOUNT",
-            entity_type="Account",
-            entity_id=account.id,
-            metadata={"change": "BALANCE_INCREASE"}
+        AuditLogService.info(
+            actor=account_id,
+            action="BALANCE_INCREASED"
         )
+
         return account
 
     @staticmethod
@@ -126,13 +121,11 @@ class AccountService:
 
         account.blocked_balance += amount
         account.save(update_fields=["blocked_balance"])
-        AuditLogService.log(
-            user=account_id,
-            action="ACCOUNT",
-            entity_type="Account",
-            entity_id=account.id,
-            metadata={"change": "BALANCE_DECREASE"}
+        AuditLogService.info(
+            actor=account_id,
+            action="BALANCE_DECREASED"
         )
+
         return account
 
     @staticmethod
@@ -150,13 +143,11 @@ class AccountService:
 
         account.blocked_balance -= amount
         account.save(update_fields=["blocked_balance"])
-        AuditLogService.log(
-            user=account_id,
-            action="ACCOUNT",
-            entity_type="Account",
-            entity_id=account.id,
-            metadata={"change": "UNBLOCK_BALANCE"}
+        AuditLogService.info(
+            actor=account_id,
+            action="BALANCE_UNBLOCKED"
         )
+
         return account
 
     @staticmethod
@@ -164,13 +155,11 @@ class AccountService:
         account = Account.objects.get(id=account_id)
         account.status = AccountStatus.BLOCKED
         account.save(update_fields=["status"])
-        AuditLogService.log(
-            user=account_id,
-            action="ACCOUNT",
-            entity_type="Account",
-            entity_id=account.id,
-            metadata={"status": "FREEZE"}
+        AuditLogService.info(
+            actor=account_id,
+            action="ACCOUNT_FREEZE"
         )
+
         return account
 
     @staticmethod
@@ -178,13 +167,11 @@ class AccountService:
         account = Account.objects.get(id=account_id)
         account.status = AccountStatus.ACTIVE
         account.save(update_fields=["status"])
-        AuditLogService.log(
-            user=account_id,
-            action="ACCOUNT",
-            entity_type="Account",
-            entity_id=account.id,
-            metadata={"status": "ACTIVATE"}
+        AuditLogService.info(
+            actor=account_id,
+            action="ACCOUNT_ACTIVATED"
         )
+
         return account
 
     @staticmethod
@@ -196,13 +183,11 @@ class AccountService:
 
         account.status = AccountStatus.CLOSED
         account.save(update_fields=["status"])
-        AuditLogService.log(
-            user=account_id,
-            action="ACCOUNT",
-            entity_type="Account",
-            entity_id=account.id,
-            metadata={"status": "CLOSE"}
+        AuditLogService.info(
+            actor=account_id,
+            action="ACCOUNT_CLOSED"
         )
+
         return account
 
     @staticmethod
