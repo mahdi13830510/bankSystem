@@ -17,6 +17,7 @@ from .models import (
     TransactionType,
     TransactionStatus
 )
+from ..notifications.templates import NotificationTemplates
 
 
 class TransactionService:
@@ -63,7 +64,11 @@ class TransactionService:
             reference_number=TransactionService.generate_reference(),
             description=description
         )
-
+        NotificationService.send_template(
+            actor,
+            NotificationTemplates.TRANSFER_SUCCESS,
+            amount=amount
+        )
         AuditLogService.log(
             user=actor,
             action="Card-Transfer",
