@@ -36,16 +36,10 @@ class FraudService:
 
         if decision == "BLOCKED":
             raise Exception("Transaction blocked by fraud system")
-        AuditLogService.log(
-            user=user,
+        AuditLogService.critical(
+            actor=user,
             action="FRAUD_DECISION",
-            entity_type="Transaction",
-            entity_id=user.id,
-            metadata={
-                "score": score,
-                "decision": decision
-            }
-
+            metadata={"risk_score": 92}
         )
         NotificationService.send_template(
             user,
