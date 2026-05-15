@@ -2,6 +2,8 @@ from apps.auditlogs.services import AuditLogService
 from apps.fraud.models import FraudReport
 from apps.fraud.services.risk_engine import RiskEngine
 from apps.fraud.services.rules import FraudRules
+from apps.notifications.services import NotificationService
+from apps.notifications.templates import NotificationTemplates
 
 
 class FraudService:
@@ -43,5 +45,10 @@ class FraudService:
                 "score": score,
                 "decision": decision
             }
+
+        )
+        NotificationService.send_template(
+            user,
+            NotificationTemplates.FRAUD_ALERT
         )
         return report
