@@ -1,25 +1,43 @@
+from .models import AuditLog, AuditSeverity
+
+
 class AuditLogService:
 
     @staticmethod
     def log(
-        *,
-        user=None,
-        action,
-        entity_type,
-        entity_id,
-        ip=None,
-        user_agent=None,
+        actor=None,
+        action="UNKNOWN",
+        target_type="",
+        target_id="",
+        description="",
+        severity="INFO",
+        ip_address=None,
+        user_agent="",
         metadata=None
     ):
-
-        from .models import AuditLog
-
         return AuditLog.objects.create(
-            user_id=getattr(user, "id", None),
+            actor=actor,
             action=action,
-            entity_type=entity_type,
-            entity_id=str(entity_id),
-            ip_address=ip,
+            target_type=target_type,
+            target_id=target_id,
+            description=description,
+            severity=severity,
+            ip_address=ip_address,
             user_agent=user_agent,
             metadata=metadata or {}
         )
+
+    @staticmethod
+    def info(**kwargs):
+        kwargs["severity"] = AuditSeverity.INFO
+        return AuditLogService.log(**kwargs)
+
+    @staticmethod
+    def warning(**kwargs):
+        kwargs["severity"] = AuditSeverity.WARNING
+        return AuditLogService.log(**kwargs)
+
+    @staticmethod
+    def critical(**kwargs):
+        kwargs["severity"] = AuditSeverity.CRITICAL
+        return AuditLogService.log(**kwargs)
