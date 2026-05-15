@@ -1,20 +1,11 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAdminUser
+
 from .models import AuditLog
+from .serializers import AuditLogSerializer
 
 
-class AuditLogListView(APIView):
-
-    def get(self, request):
-
-        logs = AuditLog.objects.all()[:100]
-
-        return Response([
-            {
-                "action": l.action,
-                "entity_type": l.entity_type,
-                "entity_id": l.entity_id,
-                "created_at": l.created_at
-            }
-            for l in logs
-        ])
+class AuditLogListView(ListAPIView):
+    queryset = AuditLog.objects.all()
+    serializer_class = AuditLogSerializer
+    permission_classes = [IsAdminUser]
