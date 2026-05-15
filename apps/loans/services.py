@@ -10,6 +10,8 @@ from apps.installments.services import InstallmentService
 from apps.accounts.models import Account
 from apps.accounts.services import AccountService
 from apps.transactions.services import TransactionService
+from ..notifications.templates import NotificationTemplates
+
 
 class LoanService:
 
@@ -89,10 +91,9 @@ class LoanService:
         # create installments
         InstallmentService.generate_schedule(loan)
 
-        NotificationService.send(
-            user=req.customer,
-            title="Loan Approved",
-            message="Your loan has been approved."
+        NotificationService.send_template(
+            req.customer,
+            NotificationTemplates.LOAN_APPROVED
         )
 
         AuditLogService.log(
