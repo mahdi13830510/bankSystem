@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -22,14 +23,8 @@ class MarkAsReadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-
-        obj = Notification.objects.get(
-            pk=pk,
-            user=request.user
-        )
-
+        obj = get_object_or_404(Notification, pk=pk, user=request.user)
         NotificationService.mark_read(obj)
-
         return Response({"detail": "read"})
 
 
@@ -37,7 +32,6 @@ class UnreadCountView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-
         count = Notification.objects.filter(
             user=request.user,
             is_read=False

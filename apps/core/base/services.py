@@ -6,4 +6,6 @@ class BaseService:
 
     @staticmethod
     def fail(message):
+
         return {"status": "error", "message": message}
+

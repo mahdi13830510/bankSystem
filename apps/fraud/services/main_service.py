@@ -14,8 +14,7 @@ class FraudService:
         history_count = transaction.account.transactions.count()
 
         score = RiskEngine.calculate_score(
-            user=user,
-            amount=transaction.amount,
+            transaction=transaction,
             ip=ip,
             history_count=history_count
         )

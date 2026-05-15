@@ -5,10 +5,10 @@ class RiskEngine:
 
     @staticmethod
     def calculate_score(
-        *,
-        transaction,
-        ip,
-        history_count
+            *,
+            transaction,
+            ip,
+            history_count
     ):
 
         score = 0

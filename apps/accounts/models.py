@@ -57,6 +57,7 @@ class Account(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     is_primary = models.BooleanField(default=False)
+
     class Meta:
         db_table = "accounts_account"
         ordering = ["-id"]

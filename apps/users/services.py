@@ -5,9 +5,9 @@ from ..auditlogs.services import AuditLogService
 class UserService:
 
     @staticmethod
-    def register_user(data):
+    def register_user(data, actor=None):
         AuditLogService.info(
-            actor=data.user,
+            actor=actor,
             action="USER_REGISTERED"
         )
         return User.objects.create_user(**data)

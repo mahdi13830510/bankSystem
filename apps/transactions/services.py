@@ -1,161 +1,213 @@
-import uuid
+from uuid import uuid4
 from decimal import Decimal
+
 from django.db import transaction as db_transaction
 
 from apps.accounts.models import Account
 from apps.auditlogs.services import AuditLogService
 from apps.notifications.services import NotificationService
-from apps.fraud.services import main_service
+from apps.notifications.templates import NotificationTemplates
+from apps.fraud.services.main_service import FraudService
 from apps.core.services import LimitService
 
 from .models import (
     Transaction,
     TransactionType,
-    TransactionStatus
+    TransactionStatus,
 )
-from ..notifications.templates import NotificationTemplates
 
 
 class TransactionService:
 
     @staticmethod
     def generate_reference():
-        return str(uuid.uuid4()).replace("-", "")[:24]
+        return uuid4().hex[:24].upper()
 
+    # ==========================================
+    # CARD TO CARD TRANSFER
+    # ==========================================
     @staticmethod
     @db_transaction.atomic
-    def card_transfer(*, actor, source, destination, amount, ip, description=""):
+    def card_transfer(
+        *,
+        actor,
+        source,
+        destination,
+        amount,
+        ip,
+        description=""
+    ):
 
-        main_service.check_transaction(
-            actor=actor,
-            source=source,
-            destination=destination,
-            amount=amount,
-            ip=ip
-        )
+        amount = Decimal(str(amount))
 
+        # daily limit
         LimitService.validate_daily_transfer_limit(
             account=source,
             amount=amount
         )
 
-        fee = destination.bank.transfer_fee
+        fee = Decimal(str(destination.bank.transfer_fee))
         total = amount + fee
 
         if source.balance < total:
             raise Exception("Insufficient balance")
 
-        source.balance -= total
-        destination.balance += amount
-
-        source.save(update_fields=["balance"])
-        destination.save(update_fields=["balance"])
-
+        # create pending transaction first
         txn = Transaction.objects.create(
             account=source,
             amount=amount,
             fee=fee,
             type=TransactionType.CARD_TO_CARD,
-            status=TransactionStatus.SUCCESS,
+            status=TransactionStatus.PENDING,
             reference_number=TransactionService.generate_reference(),
-            description=description
-        )
-        NotificationService.send_template(
-            actor,
-            NotificationTemplates.TRANSFER_SUCCESS,
-            amount=amount
-        )
-        AuditLogService.info(
-            actor=actor,
-            action="TRANSFER_SUCCESS",
-            metadata={"amount": str(amount)}
+            description=description,
         )
 
-        NotificationService.send_sms(
+        # ===============================
+        # FRAUD CHECK (MATCH YOUR SERVICE)
+        # ===============================
+        fraud_report = FraudService.check_transaction(
             user=actor,
-            message=f"Transfer successful. Ref:{txn.reference_number}"
-        )
-
-        return txn
-
-    @staticmethod
-    @db_transaction.atomic
-    def iban_transfer(*, actor, source, destination, amount, ip):
-
-        main_service.check_transaction(
-            actor=actor,
-            source=source,
-            destination=destination,
-            amount=amount,
+            transaction=txn,
             ip=ip
         )
 
-        fee = Decimal("2")
-        total = amount + fee
-
-        if source.balance < total:
-            raise Exception("Insufficient balance")
-
+        # apply balances after fraud pass
         source.balance -= total
         destination.balance += amount
 
         source.save(update_fields=["balance"])
         destination.save(update_fields=["balance"])
+
+        txn.status = TransactionStatus.SUCCESS
+        txn.save(update_fields=["status"])
+
+        NotificationService.send_template(
+            actor,
+            NotificationTemplates.TRANSFER_SUCCESS,
+            amount=amount
+        )
+
+        AuditLogService.info(
+            actor=actor,
+            action="TRANSFER_SUCCESS",
+            metadata={
+                "transaction_id": str(txn.id),
+                "amount": str(amount),
+                "risk_score": fraud_report.score,
+            }
+        )
+
+        return txn
+
+    # ==========================================
+    # IBAN TRANSFER
+    # ==========================================
+    @staticmethod
+    @db_transaction.atomic
+    def iban_transfer(
+        *,
+        actor,
+        source,
+        destination,
+        amount,
+        ip
+    ):
+
+        amount = Decimal(str(amount))
+        fee = Decimal("2.00")
+        total = amount + fee
+
+        if source.balance < total:
+            raise Exception("Insufficient balance")
 
         txn = Transaction.objects.create(
             account=source,
             amount=amount,
             fee=fee,
             type=TransactionType.IBAN_TRANSFER,
-            status=TransactionStatus.SUCCESS,
+            status=TransactionStatus.PENDING,
             reference_number=TransactionService.generate_reference(),
-            description="IBAN Transfer"
+            description="IBAN Transfer",
         )
+
+        FraudService.check_transaction(
+            user=actor,
+            transaction=txn,
+            ip=ip
+        )
+
+        source.balance -= total
+        destination.balance += amount
+
+        source.save(update_fields=["balance"])
+        destination.save(update_fields=["balance"])
+
+        txn.status = TransactionStatus.SUCCESS
+        txn.save(update_fields=["status"])
 
         AuditLogService.info(
             actor=actor,
             action="IBAN_TRANSFER_SUCCESS",
-            metadata={"amount": str(amount)}
+            metadata={
+                "transaction_id": str(txn.id),
+                "amount": str(amount)
+            }
         )
 
         return txn
 
+    # ==========================================
+    # STATEMENT
+    # ==========================================
     @staticmethod
     def get_statement(account):
-        return Transaction.objects.filter(account=account)
+        return Transaction.objects.filter(account=account).order_by("-created_at")
 
+    # ==========================================
+    # LOAN DISBURSEMENT
+    # ==========================================
     @staticmethod
     def loan_disbursement(account, amount, loan):
 
         return Transaction.objects.create(
             account=account,
             amount=amount,
-            fee=0,
-            type="LOAN_DISBURSEMENT",
-            status="SUCCESS",
+            fee=Decimal("0"),
+            type=TransactionType.LOAN_DISBURSEMENT,
+            status=TransactionStatus.SUCCESS,
+            reference_number=TransactionService.generate_reference(),
             description=f"Loan #{loan.id}"
         )
 
+    # ==========================================
+    # INSTALLMENT PAYMENT
+    # ==========================================
     @staticmethod
     def installment_payment(account, amount, installment):
 
         return Transaction.objects.create(
             account=account,
             amount=amount,
-            fee=0,
-            type="INSTALLMENT_PAYMENT",
-            status="SUCCESS",
+            fee=Decimal("0"),
+            type=TransactionType.INSTALLMENT_PAYMENT,
+            status=TransactionStatus.SUCCESS,
+            reference_number=TransactionService.generate_reference(),
             description=f"Installment #{installment.id}"
         )
 
+    # ==========================================
+    # LATE FEE
+    # ==========================================
     @staticmethod
     def late_fee(account, amount, loan):
 
         return Transaction.objects.create(
             account=account,
             amount=amount,
-            fee=0,
-            type="LATE_FEE",
-            status="SUCCESS",
+            fee=Decimal("0"),
+            type=TransactionType.LATE_FEE,
+            status=TransactionStatus.SUCCESS,
+            reference_number=TransactionService.generate_reference(),
             description=f"Loan penalty #{loan.id}"
         )

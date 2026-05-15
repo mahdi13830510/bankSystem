@@ -9,11 +9,11 @@ class AuditLogTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
             phone="09120000000",
-            password="1234"
+            password="1234",
+            email="testemail@gmail.com"
         )
 
     def test_create_log(self):
-
         AuditLogService.log(
             actor=self.user,
             action="LOGIN_SUCCESS"
@@ -25,7 +25,6 @@ class AuditLogTests(TestCase):
         )
 
     def test_warning_log(self):
-
         AuditLogService.warning(
             actor=self.user,
             action="FAILED_LOGIN"
