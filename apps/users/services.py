@@ -6,12 +6,9 @@ class UserService:
 
     @staticmethod
     def register_user(data):
-        AuditLogService.log(
-            user="admin",
-            action="ADMIN",
-            entity_type="User",
-            entity_id=data.user.id,
-            metadata={"change": "USER REGISTRATION"}
+        AuditLogService.info(
+            actor=data.user,
+            action="USER_REGISTERED"
         )
         return User.objects.create_user(**data)
 
@@ -23,12 +20,9 @@ class UserService:
     def block_user(user):
         user.status = "blocked"
         user.save()
-        AuditLogService.log(
-            user="Admin",
-            action="ADMIN",
-            entity_type="User",
-            entity_id=user.id,
-            metadata={"change": "USER_BLOCKED"}
+        AuditLogService.info(
+            actor=user,
+            action="USER_BLOCKED"
         )
 
     @staticmethod
@@ -41,10 +35,7 @@ class UserService:
     def change_password(user, new_password):
         user.set_password(new_password)
         user.save()
-        AuditLogService.log(
-            user=user,
-            action="ADMIN",
-            entity_type="User",
-            entity_id=user.id,
-            metadata={"change": "PASSWORD_CHANGE"}
+        AuditLogService.info(
+            actor=user,
+            action="PASSWORD_CHANGED"
         )
