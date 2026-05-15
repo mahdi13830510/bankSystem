@@ -11,6 +11,8 @@ from .models import Session, OTPCode
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 
 from ..auditlogs.services import AuditLogService
+from ..notifications.services import NotificationService
+from ..notifications.templates import NotificationTemplates
 
 
 class AuthService:
@@ -45,6 +47,10 @@ class AuthService:
             entity_type="Session",
             entity_id=user.session.id,
             metadata={"status": "SUCCESS"}
+        )
+        NotificationService.send_template(
+            user,
+            NotificationTemplates.LOGIN_SUCCESS
         )
 
         code = str(random.randint(100000, 999999))
