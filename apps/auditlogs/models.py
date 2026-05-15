@@ -2,36 +2,63 @@ import uuid
 from django.db import models
 
 
-class AuditActionType(models.TextChoices):
-    LOGIN = "LOGIN"
-    LOGOUT = "LOGOUT"
-    TRANSACTION = "TRANSACTION"
-    FRAUD_DECISION = "FRAUD_DECISION"
-    LOAN = "LOAN"
-    ACCOUNT = "ACCOUNT"
-    ADMIN = "ADMIN"
-    SYSTEM = "SYSTEM"
+class AuditSeverity(models.TextChoices):
+    INFO = "INFO"
+    WARNING = "WARNING"
+    CRITICAL = "CRITICAL"
 
 
 class AuditLog(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    user_id = models.UUIDField(null=True, blank=True)
+    actor = models.ForeignKey(
+        "users.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="audit_logs"
+    )
 
-    action = models.CharField(max_length=30, choices=AuditActionType.choices)
+    action = models.CharField(max_length=100)
 
-    entity_type = models.CharField(max_length=50)   # e.g. Transaction, Account
+    target_type = models.CharField(
+        max_length=100,
+        blank=True,
+        default=""
+    )
 
-    entity_id = models.CharField(max_length=100)
+    target_id = models.CharField(
+        max_length=100,
+        blank=True,
+        default=""
+    )
 
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    description = models.TextField(blank=True, default="")
 
-    user_agent = models.TextField(blank=True, null=True)
+    severity = models.CharField(
+        max_length=20,
+        choices=AuditSeverity.choices,
+        default=AuditSeverity.INFO
+    )
 
-    metadata = models.JSONField(default=dict)
+    ip_address = models.GenericIPAddressField(
+        null=True,
+        blank=True
+    )
+
+    user_agent = models.TextField(blank=True, default="")
+
+    metadata = models.JSONField(default=dict, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "audit_logs"
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["action"]),
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["severity"]),
+        ]
+
+    def __str__(self):
+        return f"{self.action} - {self.created_at}"
