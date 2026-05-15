@@ -2,6 +2,7 @@ from django.utils import timezone
 from .models import Installment
 from .services import InstallmentService
 from apps.notifications.services import NotificationService
+from ..notifications.templates import NotificationTemplates
 
 
 def check_overdue_installments():
@@ -27,8 +28,7 @@ def send_due_reminders():
     )
 
     for ins in items:
-        NotificationService.send(
-            user=ins.loan.customer,
-            title="Installment Reminder",
-            message="Your installment is due tomorrow."
+        NotificationService.send_template(
+            ins.loan.customer,
+            NotificationTemplates.INSTALLMENT_DUE
         )
