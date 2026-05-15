@@ -1,7 +1,3 @@
-# ============================================
-# apps/transactions/services.py
-# ============================================
-
 import uuid
 from decimal import Decimal
 from django.db import transaction as db_transaction
@@ -9,7 +5,7 @@ from django.db import transaction as db_transaction
 from apps.accounts.models import Account
 from apps.auditlogs.services import AuditLogService
 from apps.notifications.services import NotificationService
-from apps.fraud.services import FraudService
+from apps.fraud.services import main_service
 from apps.core.services import LimitService
 
 from .models import (
@@ -30,7 +26,7 @@ class TransactionService:
     @db_transaction.atomic
     def card_transfer(*, actor, source, destination, amount, ip, description=""):
 
-        FraudService.check_transaction(
+        main_service.check_transaction(
             actor=actor,
             source=source,
             destination=destination,
@@ -69,16 +65,10 @@ class TransactionService:
             NotificationTemplates.TRANSFER_SUCCESS,
             amount=amount
         )
-        AuditLogService.log(
-            user=actor,
-            action="Card-Transfer",
-            entity_type="Transaction",
-            entity_id=txn.id,
-            ip=ip,
-            metadata={
-                "amount": str(amount),
-                "type": txn.type
-            }
+        AuditLogService.info(
+            actor=actor,
+            action="TRANSFER_SUCCESS",
+            metadata={"amount": str(amount)}
         )
 
         NotificationService.send_sms(
@@ -92,7 +82,7 @@ class TransactionService:
     @db_transaction.atomic
     def iban_transfer(*, actor, source, destination, amount, ip):
 
-        FraudService.check_transaction(
+        main_service.check_transaction(
             actor=actor,
             source=source,
             destination=destination,
@@ -122,17 +112,12 @@ class TransactionService:
             description="IBAN Transfer"
         )
 
-        AuditLogService.log(
-            user=actor,
-            action="iBan-Transfer",
-            entity_type="Transaction",
-            entity_id=txn.id,
-            ip=ip,
-            metadata={
-                "amount": str(amount),
-                "type": txn.type
-            }
+        AuditLogService.info(
+            actor=actor,
+            action="IBAN_TRANSFER_SUCCESS",
+            metadata={"amount": str(amount)}
         )
+
         return txn
 
     @staticmethod
