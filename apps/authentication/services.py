@@ -31,23 +31,18 @@ class AuthService:
         if not user.check_password(password):
             user.failed_login_attempts += 1
             user.save()
-            AuditLogService.log(
-                user=None,
-                action="LOGIN",
-                entity_type="AUTH",
-                entity_id=user.phone,
-                metadata={"status": "FAILED"}
+            AuditLogService.warning(
+                action="LOGIN_FAILED",
+                description="Wrong password"
             )
             raise AuthenticationFailed("Wrong password")
         user.failed_login_attempts = 0
         user.save()
-        AuditLogService.log(
-            user=user,
-            action="LOGIN",
-            entity_type="Session",
-            entity_id=user.session.id,
-            metadata={"status": "SUCCESS"}
+        AuditLogService.info(
+            actor=user,
+            action="LOGIN_SUCCESS"
         )
+
         NotificationService.send_template(
             user,
             NotificationTemplates.LOGIN_SUCCESS
@@ -79,33 +74,24 @@ class AuthService:
             code=otp
         )
         if not otp:
-            AuditLogService.log(
-                user=user,
-                action="LOGIN",
-                entity_type="OTP",
-                entity_id=user.session.id,
-                metadata={"otp_verified": False}
+            AuditLogService.info(
+                actor=user,
+                action="OTP_INVALID"
             )
             raise ValidationError("Invalid OTP")
 
         if otp.expires_at < timezone.now():
-            AuditLogService.log(
-                user=user,
-                action="LOGIN",
-                entity_type="OTP",
-                entity_id=user.session.id,
-                metadata={"otp_verified": False}
+            AuditLogService.info(
+                actor=user,
+                action="OTP_EXPIRED"
             )
             raise Exception("OTP expired")
 
         otp.is_used = True
         otp.save()
-        AuditLogService.log(
-            user=user,
-            action="LOGIN",
-            entity_type="OTP",
-            entity_id=user.session.id,
-            metadata={"otp_verified": True}
+        AuditLogService.info(
+            actor=user,
+            action="OTP_VERIFIED"
         )
 
         access = jwt.encode(
