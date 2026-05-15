@@ -73,7 +73,11 @@ class AuthService:
             code=code,
             is_used=False
         ).last()
-
+        NotificationService.send_template(
+            user,
+            NotificationTemplates.OTP_SENT,
+            code=otp
+        )
         if not otp:
             AuditLogService.log(
                 user=user,
