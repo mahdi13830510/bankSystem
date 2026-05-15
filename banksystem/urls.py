@@ -8,5 +8,6 @@ urlpatterns = [
     path('fraud/', include('apps.fraud.urls')),
     path("api/transactions/", include("apps.transactions.urls")),
     path("notifications/", include("apps.notifications.urls")),
+    path("accounts/", include("apps.accounts.urls"))
 
 ]

@@ -40,7 +40,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
 
 class OpenAccountSerializer(serializers.Serializer):
-    bank_id = serializers.IntegerField()
+    bank_id = serializers.UUIDField()
     type = serializers.CharField()
     currency = serializers.CharField()
 

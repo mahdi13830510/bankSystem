@@ -1,5 +1,5 @@
 # apps/accounts/views.py
-
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -47,7 +47,7 @@ class OpenAccountView(APIView):
             currency=serializer.validated_data["currency"]
         )
 
-        return Response(AccountSerializer(account).data)
+        return Response(AccountSerializer(account).data, status=status.HTTP_201_CREATED)
 
 
 # -------------------------------

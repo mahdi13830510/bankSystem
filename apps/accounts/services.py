@@ -69,7 +69,7 @@ class AccountService:
 
     @staticmethod
     @transaction.atomic
-    def increase_balance(account_id, amount):
+    def increase_balance(account_id, amount, actor=None):
         account = Account.objects.select_for_update().get(id=account_id)
 
         amount = Decimal(amount)
@@ -79,7 +79,7 @@ class AccountService:
         account.balance += amount
         account.save(update_fields=["balance"])
         AuditLogService.info(
-            actor=account_id,
+            actor=actor,
             action="BALANCE_INCREASED"
         )
 
@@ -108,7 +108,7 @@ class AccountService:
 
     @staticmethod
     @transaction.atomic
-    def block_balance(account_id, amount):
+    def block_balance(account_id, amount, actor=None):
         account = Account.objects.select_for_update().get(id=account_id)
 
         amount = Decimal(amount)
@@ -122,7 +122,7 @@ class AccountService:
         account.blocked_balance += amount
         account.save(update_fields=["blocked_balance"])
         AuditLogService.info(
-            actor=account_id,
+            actor=actor,
             action="BALANCE_DECREASED"
         )
 
@@ -130,7 +130,7 @@ class AccountService:
 
     @staticmethod
     @transaction.atomic
-    def unblock_balance(account_id, amount):
+    def unblock_balance(account_id, amount, actor=None):
         account = Account.objects.select_for_update().get(id=account_id)
 
         amount = Decimal(amount)
@@ -144,38 +144,38 @@ class AccountService:
         account.blocked_balance -= amount
         account.save(update_fields=["blocked_balance"])
         AuditLogService.info(
-            actor=account_id,
+            actor=actor,
             action="BALANCE_UNBLOCKED"
         )
 
         return account
 
     @staticmethod
-    def freeze(account_id):
+    def freeze(account_id, actor=None):
         account = Account.objects.get(id=account_id)
         account.status = AccountStatus.BLOCKED
         account.save(update_fields=["status"])
         AuditLogService.info(
-            actor=account_id,
+            actor=actor,
             action="ACCOUNT_FREEZE"
         )
 
         return account
 
     @staticmethod
-    def activate(account_id):
+    def activate(account_id, actor=None):
         account = Account.objects.get(id=account_id)
         account.status = AccountStatus.ACTIVE
         account.save(update_fields=["status"])
         AuditLogService.info(
-            actor=account_id,
+            actor=actor,
             action="ACCOUNT_ACTIVATED"
         )
 
         return account
 
     @staticmethod
-    def close(account_id):
+    def close(account_id,actor=None):
         account = Account.objects.get(id=account_id)
 
         if account.balance > 0:
@@ -184,7 +184,7 @@ class AccountService:
         account.status = AccountStatus.CLOSED
         account.save(update_fields=["status"])
         AuditLogService.info(
-            actor=account_id,
+            actor=actor,
             action="ACCOUNT_CLOSED"
         )
 
@@ -210,3 +210,4 @@ class AccountService:
             account.loan_blocked_balance = 0
 
         account.save(update_fields=["loan_blocked_balance"])
+
