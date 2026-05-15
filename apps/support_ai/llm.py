@@ -3,7 +3,6 @@ class SimpleLLM:
     @staticmethod
     def generate_response(prompt, user_message):
 
-
         if "loan" in user_message.lower():
             return "You can apply for a loan from Loans section."
 
