@@ -13,5 +13,5 @@ urlpatterns = [
     path("support_ai/", include("apps.support_ai.urls")),
     path("loans/", include("apps.loans.urls")),
     path("installments/", include("apps.installments.urls")),
-
+    path("dashboard/", include("apps.dashboard.urls")),
 ]

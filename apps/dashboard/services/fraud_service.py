@@ -17,5 +17,5 @@ class FraudDashboardService:
     def recent_alerts(limit=10):
 
         return list(
-            FraudAlert.objects.order_by("-created_at")[:limit].values()
+            FraudReport.objects.order_by("-created_at")[:limit].values()
         )
