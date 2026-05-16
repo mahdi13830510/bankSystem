@@ -1,14 +1,18 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+
+from rest_framework.test import APITestCase
+from rest_framework import status
+from rest_framework import serializers
+
 from decimal import Decimal
+
 from apps.accounts.models import Account, AccountStatus, AccountType, CurrencyType
 from apps.accounts.services import AccountService
 from apps.banks.models import Bank
-from rest_framework.test import APITestCase
-from rest_framework import status
 from apps.accounts.validators import validate_unique_account_type_per_bank_customer
-from rest_framework import serializers
+
 
 User = get_user_model()
 

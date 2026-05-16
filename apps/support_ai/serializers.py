@@ -5,7 +5,14 @@ from .models import AIConversation, AIMessage
 class AIMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = AIMessage
-        fields = "__all__"
+        fields = [
+            "id",
+            "conversation",
+            "role",
+            "content",
+            "metadata",
+            "created_at"
+        ]
 
 
 class AIConversationSerializer(serializers.ModelSerializer):
@@ -13,4 +20,9 @@ class AIConversationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AIConversation
-        fields = "__all__"
+        fields = [
+            "id",
+            "user",
+            "created_at",
+            "messages"
+        ]

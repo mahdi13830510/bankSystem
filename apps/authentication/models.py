@@ -1,7 +1,8 @@
 from django.utils import timezone
-from datetime import timedelta
 from django.db import models
 from django.conf import settings
+
+from datetime import timedelta
 
 
 def get_default_session_expiry():
@@ -25,7 +26,7 @@ class Session(models.Model):
 
     refresh_token = models.TextField()
 
-    device_name = models.CharField(max_length=255,default="Unknown")
+    device_name = models.CharField(max_length=255, default="Unknown")
 
     ip_address = models.GenericIPAddressField()
 

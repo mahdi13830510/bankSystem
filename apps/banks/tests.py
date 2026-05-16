@@ -1,10 +1,12 @@
+import uuid
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from django.urls import reverse
+
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
+
 from .models import Bank, Branch, BankStatus
-import uuid
 
 User = get_user_model()
 
@@ -89,10 +91,9 @@ class BankAPITest(APITestCase):
             "swift_code": "NEWBTRXX",
             "transfer_fee": "5.00"
         }
-        response = self.client.post(self.bank_create_url, data,format="json")
+        response = self.client.post(self.bank_create_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Bank.objects.count(), 3)
-
 
     def test_create_bank_as_regular_user_forbidden(self):
         self.client.force_authenticate(user=self.regular_user)
@@ -128,4 +129,3 @@ class BranchAPITest(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
-

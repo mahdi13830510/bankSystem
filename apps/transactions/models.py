@@ -1,5 +1,4 @@
 import uuid
-from decimal import Decimal
 from django.db import models
 
 
@@ -25,7 +24,8 @@ class TransactionStatus(models.TextChoices):
 
 
 class Transaction(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4,
+                          editable=False)
 
     account = models.ForeignKey(
         "accounts.Account",

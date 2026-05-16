@@ -1,7 +1,6 @@
-# apps/accounts/services.py
-
 import random
 from decimal import Decimal
+
 from django.db import transaction
 from django.core.exceptions import ValidationError
 

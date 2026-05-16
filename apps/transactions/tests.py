@@ -1,10 +1,7 @@
-# apps/transactions/tests.py
-
 from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 

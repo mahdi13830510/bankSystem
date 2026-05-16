@@ -1,13 +1,15 @@
+import uuid
+
 from django.test import TestCase
 from unittest.mock import MagicMock, patch
+
+from rest_framework.test import APITestCase
 
 from apps.banks.models import BankStatus
 from apps.fraud.services.main_service import FraudService
 from apps.fraud.services.risk_engine import RiskEngine
 from apps.fraud.services.rules import FraudRules
 from apps.fraud.models import FraudReport, FraudDecision
-from rest_framework.test import APITestCase
-import uuid
 
 
 class FraudBaseTest(TestCase):
@@ -141,7 +143,6 @@ class FraudServiceTest(FraudBaseTest):
 class FraudReportListViewTest(APITestCase):
 
     def test_list_reports(self):
-
         FraudReport.objects.create(
             transaction_id=uuid.uuid4(),
             user_id=uuid.uuid4(),

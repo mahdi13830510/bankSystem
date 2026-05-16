@@ -7,7 +7,6 @@ class AIService:
 
     @staticmethod
     def get_or_create_conversation(user):
-
         conv = AIConversation.objects.filter(user=user).first()
 
         if not conv:
@@ -17,7 +16,6 @@ class AIService:
 
     @staticmethod
     def send_message(user, message_text):
-
         conv = AIService.get_or_create_conversation(user)
 
         AIMessage.objects.create(

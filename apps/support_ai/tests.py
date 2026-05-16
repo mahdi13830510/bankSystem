@@ -1,7 +1,8 @@
 import uuid
+
 from django.test import TestCase
-from django.urls import reverse
 from django.contrib.auth import get_user_model
+
 from rest_framework.test import APITestCase
 from rest_framework import status
 
@@ -16,7 +17,9 @@ User = get_user_model()
 # ---  (Model Tests) ---
 class SupportAIModelTest(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(email="testuser@gmail.com",phone="09145670987", password="password123")
+        self.user = User.objects.create_user(email="testuser@gmail.com",
+                                             phone="09145670987",
+                                             password="password123")
 
     def test_create_conversation(self):
         conv = AIConversation.objects.create(user=self.user)
@@ -38,7 +41,9 @@ class SupportAIModelTest(TestCase):
 # ---  LLM (Service & LLM Tests) ---
 class SupportAIServiceTest(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(email="testuser@gmail.com",phone="09145670987", password="password123")
+        self.user = User.objects.create_user(email="testuser@gmail.com",
+                                             phone="09145670987",
+                                             password="password123")
 
     def test_get_or_create_conversation(self):
         conv1 = AIService.get_or_create_conversation(self.user)
@@ -49,17 +54,22 @@ class SupportAIServiceTest(TestCase):
         self.assertEqual(AIConversation.objects.count(), 1)
 
     def test_simple_llm_responses(self):
-        resp_loan = SimpleLLM.generate_response("", "tell me about loans")
+        resp_loan = SimpleLLM.generate_response("",
+                                                "tell me about loans")
         self.assertIn("loan", resp_loan.lower())
 
-        resp_fraud = SimpleLLM.generate_response("", "someone stole my card fraud")
+        resp_fraud = SimpleLLM.generate_response("",
+                                                 "someone stole my card fraud")
         self.assertIn("suspicious", resp_fraud.lower())
 
-        resp_default = SimpleLLM.generate_response("", "hello")
-        self.assertEqual(resp_default, "I am your banking assistant. How can I help you?")
+        resp_default = SimpleLLM.generate_response("",
+                                                   "hello")
+        self.assertEqual(resp_default,
+                         "I am your banking assistant. How can I help you?")
 
     def test_send_message_service(self):
-        response = AIService.send_message(self.user, "I want a loan")
+        response = AIService.send_message(self.user,
+                                          "I want a loan")
 
         conv = AIConversation.objects.get(user=self.user)
         self.assertEqual(conv.messages.count(), 2)
@@ -70,7 +80,9 @@ class SupportAIServiceTest(TestCase):
 # ---  (API/View Tests) ---
 class SupportAIAPITest(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(email="testuser@gmail.com",phone="09145670987", password="password123")
+        self.user = User.objects.create_user(email="testuser@gmail.com",
+                                             phone="09145670987",
+                                             password="password123")
         self.client.force_authenticate(user=self.user)
         self.chat_url = "/support_ai/chat/"
         self.conv_url = "/support_ai/conversation/"
@@ -100,11 +112,15 @@ class SupportAIAPITest(APITestCase):
 # ---  (Serializer Tests) ---
 class SupportAISerializerTest(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(email="testuser@gmail.com",phone="09145670987", password="password123")
+        self.user = User.objects.create_user(email="testuser@gmail.com",
+                                             phone="09145670987",
+                                             password="password123")
         self.conv = AIConversation.objects.create(user=self.user)
-        AIMessage.objects.create(conversation=self.conv, role=AIMessageRole.USER, content="Hi")
+        AIMessage.objects.create(conversation=self.conv,
+                                 role=AIMessageRole.USER, content="Hi")
 
     def test_conversation_serializer(self):
         serializer = AIConversationSerializer(instance=self.conv)
         self.assertEqual(len(serializer.data['messages']), 1)
-        self.assertEqual(serializer.data['messages'][0]['content'], "Hi")
+        self.assertEqual(serializer.data['messages'][0]['content'],
+                         "Hi")

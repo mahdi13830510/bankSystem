@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from .serializers import (
     LoginSerializer,
     VerifyOTPSerializer,
-    RefreshSerializer
 )
 
 from .services import AuthService

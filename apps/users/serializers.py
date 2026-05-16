@@ -3,7 +3,6 @@ from .models import User, UserProfile
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -18,14 +17,21 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         exclude = ["password"]
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = UserProfile
-        fields = "__all__"
+        fields = [
+            "id",
+            "user",
+            "address",
+            "city",
+            "postal_code",
+            "birth_date",
+            "avatar",
+
+        ]

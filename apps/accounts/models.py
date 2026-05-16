@@ -1,7 +1,6 @@
-# apps/accounts/models.py
-
 from django.db import models
 from django.conf import settings
+
 from apps.banks.models import Bank
 
 

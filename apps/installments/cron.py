@@ -1,8 +1,9 @@
 from django.utils import timezone
+
 from .models import Installment
 from .services import InstallmentService
 from apps.notifications.services import NotificationService
-from ..notifications.templates import NotificationTemplates
+from apps.notifications.templates import NotificationTemplates
 
 
 def check_overdue_installments():

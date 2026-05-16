@@ -1,9 +1,10 @@
 import uuid
 from datetime import timedelta
+from unittest.mock import patch, MagicMock
 
 from django.test import TestCase
 from django.utils import timezone
-from unittest.mock import patch, MagicMock
+
 from rest_framework.test import APIClient
 from rest_framework import status
 
@@ -63,8 +64,10 @@ class NotificationModelTestCase(TestCase):
         self.assertEqual(notification.read_at, now)
 
     def test_notification_ordering(self):
-        n1 = Notification.objects.create(user=self.user, title="Old", message="Old msg")
-        n2 = Notification.objects.create(user=self.user, title="New", message="New msg")
+        n1 = Notification.objects.create(user=self.user, title="Old",
+                                         message="Old msg")
+        n2 = Notification.objects.create(user=self.user, title="New",
+                                         message="New msg")
 
         # Ensure a clear time difference for ordering
         Notification.objects.filter(id=n1.id).update(
@@ -126,7 +129,8 @@ class NotificationSerializerTestCase(TestCase):
             "message": "Updated Message",
         }
 
-        serializer = NotificationSerializer(notification, data=data, partial=True)
+        serializer = NotificationSerializer(notification, data=data,
+                                            partial=True)
         self.assertTrue(serializer.is_valid(), serializer.errors)
         obj = serializer.save()
 
@@ -199,7 +203,8 @@ class NotificationServiceTestCase(TestCase):
         )
 
         self.assertEqual(notification.title, "OTP Code")
-        self.assertEqual(notification.message, "Your verification code is 123456")
+        self.assertEqual(notification.message,
+                         "Your verification code is 123456")
         self.assertEqual(notification.status, NotificationStatus.SENT)
 
     def test_mark_read(self):
@@ -248,12 +253,16 @@ class NotificationServiceTestCase(TestCase):
 class NotificationTemplatesTestCase(TestCase):
 
     def test_login_success_template(self):
-        self.assertEqual(NotificationTemplates.LOGIN_SUCCESS["title"], "Login Successful")
-        self.assertEqual(NotificationTemplates.LOGIN_SUCCESS["message"], "You logged in successfully.")
+        self.assertEqual(NotificationTemplates.LOGIN_SUCCESS["title"],
+                         "Login Successful")
+        self.assertEqual(NotificationTemplates.LOGIN_SUCCESS["message"],
+                         "You logged in successfully.")
 
     def test_otp_sent_template(self):
-        self.assertEqual(NotificationTemplates.OTP_SENT["title"], "OTP Code")
-        self.assertIn("{code}", NotificationTemplates.OTP_SENT["message"])
+        self.assertEqual(NotificationTemplates.OTP_SENT["title"],
+                         "OTP Code")
+        self.assertIn("{code}",
+                      NotificationTemplates.OTP_SENT["message"])
 
     def test_all_templates_have_title_and_message(self):
         templates = [
@@ -321,7 +330,8 @@ class NotificationAPITestCase(TestCase):
         )
 
         self.client.force_authenticate(user=self.user)
-        response = self.client.post(f"/notifications/{notification.id}/read/")
+        response = (
+            self.client.post(f"/notifications/{notification.id}/read/"))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, {"detail": "read"})

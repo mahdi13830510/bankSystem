@@ -5,7 +5,17 @@ from .models import Transaction
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = "__all__"
+        fields = [
+            "id",
+            "account",
+            "amount",
+            "fee",
+            "type",
+            "status",
+            "reference_number",
+            "description",
+            "created_at"
+        ]
 
 
 class CardTransferSerializer(serializers.Serializer):

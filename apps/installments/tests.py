@@ -1,17 +1,18 @@
-import uuid
 from decimal import Decimal
+from unittest.mock import patch, MagicMock
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+
 from dateutil.relativedelta import relativedelta
+
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
-from unittest.mock import patch, MagicMock
 
 from apps.loans.models import Loan, LoanRequest, LoanType
 from apps.installments.models import Installment, InstallmentStatus
 from apps.installments.services import InstallmentService
-
 
 from apps.installments.cron import check_overdue_installments
 from apps.installments.cron import send_due_reminders
@@ -22,7 +23,8 @@ User = get_user_model()
 class InstallmentBaseTestCase(TestCase):
 
     def setUp(self):
-        self.user = User.objects.create_user(email="testuser@gmail.com",phone="09145670989",
+        self.user = User.objects.create_user(email="testuser@gmail.com",
+                                             phone="09145670989",
                                              password="password123")
 
         self.loan_request = LoanRequest.objects.create(
@@ -123,7 +125,8 @@ class TestInstallmentAPIs(APITestCase):
                                              password="password")
         self.client.force_authenticate(user=self.user)
 
-        lr = LoanRequest.objects.create(customer=self.user, amount=1000, duration_months=1, loan_type=LoanType.CAR,
+        lr = LoanRequest.objects.create(customer=self.user, amount=1000, duration_months=1,
+                                        loan_type=LoanType.CAR,
                                         monthly_income=5000)
         self.loan = Loan.objects.create(
             customer=self.user, loan_request=lr, principal_amount=1000,
@@ -166,7 +169,8 @@ class TestInstallmentTasks(InstallmentBaseTestCase):
 
         yesterday = timezone.now().date() - timezone.timedelta(days=1)
         Installment.objects.create(
-            loan=self.loan, number=1, due_date=yesterday, amount=1000, status=InstallmentStatus.PENDING
+            loan=self.loan, number=1, due_date=yesterday, amount=1000,
+            status=InstallmentStatus.PENDING
         )
 
         check_overdue_installments()
@@ -177,7 +181,8 @@ class TestInstallmentTasks(InstallmentBaseTestCase):
 
         tomorrow = timezone.now().date() + timezone.timedelta(days=1)
         Installment.objects.create(
-            loan=self.loan, number=1, due_date=tomorrow, amount=1000, status=InstallmentStatus.PENDING
+            loan=self.loan, number=1, due_date=tomorrow, amount=1000,
+            status=InstallmentStatus.PENDING
         )
 
         send_due_reminders()

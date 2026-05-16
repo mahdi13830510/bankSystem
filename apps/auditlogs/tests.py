@@ -1,4 +1,5 @@
 from django.test import TestCase
+
 from apps.users.models import User
 from .models import AuditLog
 from .services import AuditLogService

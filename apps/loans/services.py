@@ -7,10 +7,9 @@ from .calculators import LoanCalculator
 from apps.auditlogs.services import AuditLogService
 from apps.notifications.services import NotificationService
 from apps.installments.services import InstallmentService
-from apps.accounts.models import Account
 from apps.accounts.services import AccountService
 from apps.transactions.services import TransactionService
-from ..notifications.templates import NotificationTemplates
+from apps.notifications.templates import NotificationTemplates
 
 
 class LoanService:

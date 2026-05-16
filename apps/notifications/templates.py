@@ -1,5 +1,4 @@
 class NotificationTemplates:
-
     LOGIN_SUCCESS = {
         "title": "Login Successful",
         "message": "You logged in successfully."

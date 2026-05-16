@@ -1,10 +1,13 @@
-from django.test import TestCase
-from decimal import Decimal
-from apps.loans.calculators import LoanCalculator
-from django.contrib.auth import get_user_model
 from unittest.mock import patch, MagicMock
+from decimal import Decimal
+
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+
+from apps.loans.calculators import LoanCalculator
 from apps.loans.models import LoanRequest, Loan, LoanRequestStatus
 from apps.loans.services import LoanService
+
 from rest_framework.test import APITestCase
 from rest_framework import status
 

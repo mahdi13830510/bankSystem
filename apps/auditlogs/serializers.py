@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from .models import AuditLog
 
 
@@ -10,4 +11,16 @@ class AuditLogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AuditLog
-        fields = "__all__"
+        fields = [
+            "id",
+            "actor",
+            "action",
+            "target_type",
+            "target_id",
+            "description",
+            "severity",
+            "ip_address",
+            "user_agent",
+            "metadata",
+            "created_at"
+        ]

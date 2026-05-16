@@ -1,14 +1,17 @@
-from django.test import TestCase
 from unittest.mock import patch, MagicMock
+
+from django.test import TestCase
 from django.utils import timezone
+from django.urls import reverse
+from django.contrib.auth import get_user_model
+
+from rest_framework.test import APITestCase
+from rest_framework import status
+
 from apps.dashboard.services.analytics_service import AnalyticsService
 from apps.dashboard.services.fraud_service import FraudDashboardService
 from apps.dashboard.services.kpi_service import KPIService
 from apps.dashboard.services.realtime_service import RealtimeService
-from django.urls import reverse
-from rest_framework.test import APITestCase
-from rest_framework import status
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 

@@ -1,4 +1,5 @@
 from django.db.models import Sum, Avg
+
 from apps.accounts.models import Account
 from apps.transactions.models import Transaction
 from apps.loans.models import Loan

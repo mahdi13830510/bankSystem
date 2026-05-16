@@ -5,10 +5,29 @@ from .models import Bank, Branch
 class BankSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bank
-        fields = "__all__"
+        fields = [
+            "id",
+            "name",
+            "code",
+            "iban_prefix",
+            "swift_code",
+            "transfer_fee",
+            "status",
+            "supports_instant_transfer",
+            "created_at"
+        ]
 
 
 class BranchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Branch
-        fields = "__all__"
+        fields = [
+            "id",
+            "bank",
+            "name",
+            "code",
+            "city",
+            "address",
+            "phone",
+            "is_active"
+        ]

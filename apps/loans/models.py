@@ -1,5 +1,5 @@
 import uuid
-from decimal import Decimal
+
 from django.db import models
 from django.conf import settings
 
@@ -39,7 +39,8 @@ class LoanRequest(models.Model):
     loan_type = models.CharField(max_length=30, choices=LoanType.choices)
 
     monthly_income = models.DecimalField(max_digits=18, decimal_places=2)
-    existing_debt = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    existing_debt = models.DecimalField(max_digits=18, decimal_places=2,
+                                        default=0)
 
     status = models.CharField(
         max_length=30,
@@ -55,7 +56,8 @@ class LoanRequest(models.Model):
 
 
 class Loan(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4,
+                          editable=False)
 
     customer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -75,7 +77,8 @@ class Loan(models.Model):
 
     duration_months = models.PositiveIntegerField()
 
-    paid_amount = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    paid_amount = models.DecimalField(max_digits=18, decimal_places=2,
+                                      default=0)
 
     status = models.CharField(
         max_length=20,

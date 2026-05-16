@@ -11,10 +11,34 @@ class LoanRequestCreateSerializer(serializers.ModelSerializer):
 class LoanRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = LoanRequest
-        fields = "__all__"
+        fields = [
+            "id",
+            "customer",
+            "amount",
+            "duration_months",
+            "loan_type",
+            "monthly_income",
+            "existing_debt",
+            "status",
+            "risk_score",
+            "manager_note",
+            "created_at"
+        ]
 
 
 class LoanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Loan
-        fields = "__all__"
+        fields = [
+            "id",
+            "customer",
+            "loan_request",
+            "principal_amount",
+            "interest_rate",
+            "total_payable",
+            "monthly_installment",
+            "duration_months",
+            "paid_amount",
+            "status",
+            "started_at"
+        ]

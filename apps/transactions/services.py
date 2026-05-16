@@ -3,7 +3,6 @@ from decimal import Decimal
 
 from django.db import transaction as db_transaction
 
-from apps.accounts.models import Account
 from apps.auditlogs.services import AuditLogService
 from apps.notifications.services import NotificationService
 from apps.notifications.templates import NotificationTemplates

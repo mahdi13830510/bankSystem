@@ -4,7 +4,7 @@ class MLScoringService:
     def predict(features: dict):
 
         # placeholder model
-        # در real system: sklearn / tensorflow
+        #  real system: sklearn / tensorflow
 
         if features["amount"] > 8000:
             return 70
