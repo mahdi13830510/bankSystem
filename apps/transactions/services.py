@@ -7,7 +7,7 @@ from apps.auditlogs.services import AuditLogService
 from apps.notifications.services import NotificationService
 from apps.notifications.templates import NotificationTemplates
 from apps.fraud.services.main_service import FraudService
-from apps.core.services import LimitService
+from apps.transactions.core_services import LimitService
 
 from .models import (
     Transaction,
