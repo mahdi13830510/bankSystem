@@ -1,0 +1,123 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Fraud ML Model Dashboard{% endblock %}
+
+{% block content %}
+<h1>Fraud ML Model Dashboard</h1>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:30px">
+  {% for card in cards %}
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:20px;min-width:200px;flex:1">
+    <div style="font-size:12px;color:#777;text-transform:uppercase;letter-spacing:.5px">{{ card.label }}</div>
+    <div style="font-size:28px;font-weight:bold;margin:6px 0;color:{{ card.color }}">{{ card.value }}</div>
+    {% if card.sub %}<div style="font-size:12px;color:#999">{{ card.sub }}</div>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:30px">
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:20px;flex:1;min-width:300px">
+    <h3 style="margin-top:0">Model Parameters</h3>
+    <table style="width:100%;border-collapse:collapse">
+      {% for k, v in model_params.items %}
+      <tr style="border-bottom:1px solid #f0f0f0">
+        <td style="padding:8px 4px;color:#555;font-weight:600;width:50%">{{ k }}</td>
+        <td style="padding:8px 4px;font-family:monospace">{{ v }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:20px;flex:1;min-width:300px">
+    <h3 style="margin-top:0">Feature Scaler (StandardScaler means)</h3>
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:#f8f8f8">
+          <th style="padding:8px;text-align:left">Feature</th>
+          <th style="padding:8px;text-align:right">Mean</th>
+          <th style="padding:8px;text-align:right">Std</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in scaler_stats %}
+        <tr style="border-bottom:1px solid #f0f0f0">
+          <td style="padding:8px">{{ row.name }}</td>
+          <td style="padding:8px;text-align:right;font-family:monospace">{{ row.mean }}</td>
+          <td style="padding:8px;text-align:right;font-family:monospace">{{ row.std }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:20px;margin-bottom:30px">
+  <h3 style="margin-top:0">Score Distribution (last 500 reports)</h3>
+  <div style="display:flex;gap:4px;align-items:flex-end;height:120px;margin-bottom:8px">
+    {% for bucket in score_buckets %}
+    <div title="{{ bucket.label }}: {{ bucket.count }}"
+         style="flex:1;background:{{ bucket.color }};height:{{ bucket.height }}px;min-height:2px;border-radius:2px 2px 0 0;cursor:default"></div>
+    {% endfor %}
+  </div>
+  <div style="display:flex;gap:4px">
+    {% for bucket in score_buckets %}
+    <div style="flex:1;text-align:center;font-size:10px;color:#999">{{ bucket.label }}</div>
+    {% endfor %}
+  </div>
+</div>
+
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:20px;margin-bottom:30px">
+  <h3 style="margin-top:0">Live Score Tester</h3>
+  <form method="post" action="{% url 'admin:fraud_score_test' %}">
+    {% csrf_token %}
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+      {% for field in test_fields %}
+      <div>
+        <label style="display:block;font-size:12px;color:#555;margin-bottom:4px">{{ field.label }}</label>
+        <input name="{{ field.name }}" type="{{ field.type }}" value="{{ field.default }}"
+               step="{{ field.step }}" style="padding:6px 8px;border:1px solid #ccc;border-radius:4px;width:120px">
+      </div>
+      {% endfor %}
+      <button type="submit" style="padding:7px 20px;background:#417690;color:#fff;border:none;border-radius:4px;cursor:pointer;height:32px">
+        Calculate Score
+      </button>
+    </div>
+  </form>
+
+  {% if test_result %}
+  <div style="margin-top:16px;padding:16px;background:#f8f8f8;border-radius:6px;border-left:4px solid {{ test_result.color }}">
+    <div style="display:flex;gap:24px;align-items:center">
+      <div>
+        <div style="font-size:12px;color:#777">ML Score</div>
+        <div style="font-size:36px;font-weight:bold;color:{{ test_result.color }}">{{ test_result.ml_score }}</div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#777">Combined Score</div>
+        <div style="font-size:36px;font-weight:bold;color:{{ test_result.color }}">{{ test_result.combined_score }}</div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#777">Decision</div>
+        <div style="font-size:24px;font-weight:bold;color:{{ test_result.color }}">{{ test_result.decision }}</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:20px">
+  <h3 style="margin-top:0">Management Commands</h3>
+  <table style="width:100%;border-collapse:collapse">
+    <tr style="border-bottom:1px solid #eee">
+      <td style="padding:10px 8px;font-family:monospace;color:#2a7ae2">python manage.py train_fraud_model</td>
+      <td style="padding:10px 8px;color:#555">Retrain model with fresh synthetic data (default 50,000 samples)</td>
+    </tr>
+    <tr style="border-bottom:1px solid #eee">
+      <td style="padding:10px 8px;font-family:monospace;color:#2a7ae2">python manage.py train_fraud_model --samples 100000</td>
+      <td style="padding:10px 8px;color:#555">Retrain with custom sample count</td>
+    </tr>
+    <tr>
+      <td style="padding:10px 8px;font-family:monospace;color:#2a7ae2">python apps/fraud/ml/train.py</td>
+      <td style="padding:10px 8px;color:#555">Standalone training script (no Django environment needed)</td>
+    </tr>
+  </table>
+</div>
+{% endblock %}
