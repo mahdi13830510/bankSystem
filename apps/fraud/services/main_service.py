@@ -29,19 +29,22 @@ class FraudService:
             reason={
                 "amount": str(transaction.amount),
                 "ip": ip,
-                "history": history_count
+                "history": history_count,
+                "model": "isolation_forest_v1",
             }
         )
 
         if decision == "BLOCKED":
             raise Exception("Transaction blocked by fraud system")
-        AuditLogService.critical(
-            actor=user,
-            action="FRAUD_DECISION",
-            metadata={"risk_score": 92}
-        )
-        NotificationService.send_template(
-            user,
-            NotificationTemplates.FRAUD_ALERT
-        )
+
+        if decision in ("BLOCKED", "SUSPICIOUS"):
+            AuditLogService.critical(
+                actor=user,
+                action="FRAUD_DECISION",
+                metadata={"risk_score": score, "decision": decision}
+            )
+            NotificationService.send_template(
+                user,
+                NotificationTemplates.FRAUD_ALERT
+            )
         return report
