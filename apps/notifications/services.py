@@ -60,3 +60,10 @@ class NotificationService:
 
         for user in users:
             NotificationService.send(user, title, message)
+
+    @staticmethod
+    def get_unread(user):
+        return Notification.objects.filter(
+            user=user,
+            is_read=False
+        )

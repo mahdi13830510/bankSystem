@@ -9,7 +9,6 @@ DEBUG = config("DEBUG", cast=bool)
 
 ALLOWED_HOSTS = ["*"]
 
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -32,8 +31,8 @@ INSTALLED_APPS = [
     "apps.fraud",
     "apps.notifications",
     "apps.auditlogs",
-    "apps.support_ai",
     "apps.core",
+    "apps.ai_agent"
 ]
 
 MIDDLEWARE = [
@@ -81,3 +80,9 @@ REST_FRAMEWORK = {
 STATIC_URL = "/static/"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+OLLAMA_URL = "http://localhost:11434/api/generate"
+
+OLLAMA_MODEL = "llama3.1"
+
+OLLAMA_TIMEOUT = 60

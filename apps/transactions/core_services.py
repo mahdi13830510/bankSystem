@@ -39,7 +39,7 @@ class LimitService:
 
     @staticmethod
     def _is_vip(account):
-        return getattr(account.user, "is_vip", False)
+        return getattr(account.customer, "is_vip", False)
 
     @staticmethod
     def _transfer_limit(account):

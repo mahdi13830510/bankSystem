@@ -19,7 +19,7 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 
 class CardTransferSerializer(serializers.Serializer):
-    source_account_id = serializers.UUIDField()
+    source_account_id = serializers.IntegerField()
     destination_account_id = serializers.UUIDField()
     amount = serializers.DecimalField(max_digits=18, decimal_places=2)
     description = serializers.CharField(required=False, allow_blank=True)
