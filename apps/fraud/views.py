@@ -7,8 +7,7 @@ from .models import FraudReport
 class FraudReportListView(APIView):
 
     def get(self, request):
-        reports = FraudReport.objects.all().order_by("-created_at")
-
+        reports = FraudReport.objects.order_by("-created_at", "-pk")
         return Response([
             {
                 "id": r.id,
