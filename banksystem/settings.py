@@ -31,7 +31,6 @@ INSTALLED_APPS = [
     "apps.fraud",
     "apps.notifications",
     "apps.auditlogs",
-    "apps.core",
     "apps.ai_agent"
 ]
 
