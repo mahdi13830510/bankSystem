@@ -1,0 +1,151 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Broadcast Notification{% endblock %}
+
+{% block content %}
+<h1>&#128226; Broadcast Notification</h1>
+
+<p style="color:#555;margin-bottom:24px">
+  Send a notification to <strong>all active users</strong> at once.
+  Use this carefully — every active user will receive this message.
+</p>
+
+<!-- ============================================================
+     Broadcast Form
+     ============================================================ -->
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:28px;max-width:680px;margin-bottom:28px">
+  <h3 style="margin-top:0;font-size:15px;color:#333">Compose Broadcast</h3>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- Title -->
+    <div style="margin-bottom:18px">
+      <label style="display:block;font-size:13px;font-weight:600;color:#555;margin-bottom:6px">
+        Title <span style="color:#dc3545">*</span>
+      </label>
+      <input
+        name="title"
+        type="text"
+        maxlength="255"
+        required
+        placeholder="e.g. System Maintenance Tonight"
+        style="width:100%;padding:9px 12px;border:1px solid #ccc;border-radius:4px;
+               font-size:14px;box-sizing:border-box"
+      >
+    </div>
+
+    <!-- Message -->
+    <div style="margin-bottom:18px">
+      <label style="display:block;font-size:13px;font-weight:600;color:#555;margin-bottom:6px">
+        Message <span style="color:#dc3545">*</span>
+      </label>
+      <textarea
+        name="message"
+        rows="4"
+        required
+        placeholder="Write your broadcast message here..."
+        style="width:100%;padding:9px 12px;border:1px solid #ccc;border-radius:4px;
+               font-size:14px;box-sizing:border-box;resize:vertical"
+      ></textarea>
+    </div>
+
+    <!-- Channel -->
+    <div style="margin-bottom:24px">
+      <label style="display:block;font-size:13px;font-weight:600;color:#555;margin-bottom:8px">
+        Channel
+      </label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        {% for ch in channels %}
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;
+                      padding:8px 14px;border:2px solid #ddd;border-radius:6px;
+                      font-size:13px;font-weight:600;color:#333;
+                      transition:border-color .2s">
+          <input
+            type="radio"
+            name="channel"
+            value="{{ ch.value }}"
+            {% if ch.value == "IN_APP" %}checked{% endif %}
+            style="accent-color:{{ ch.color }}"
+          >
+          <span style="color:{{ ch.color }}">{{ ch.label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Warning banner -->
+    <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:4px;
+                padding:12px 16px;margin-bottom:20px;font-size:13px;color:#6d4c00">
+      &#9888; This will send a notification to <strong>all active users</strong>.
+      Double-check your message before sending.
+    </div>
+
+    <button
+      type="submit"
+      style="padding:10px 28px;background:#6f42c1;color:#fff;border:none;
+             border-radius:6px;font-size:14px;font-weight:600;cursor:pointer"
+      onclick="return confirm('Are you sure you want to broadcast this message to ALL active users?')"
+    >
+      &#128226; Send Broadcast
+    </button>
+    &nbsp;
+    <a href="{{ dashboard_url }}"
+       style="padding:10px 20px;background:#eee;color:#333;border-radius:6px;
+              text-decoration:none;font-size:14px;font-weight:600">
+      Cancel
+    </a>
+  </form>
+</div>
+
+<!-- ============================================================
+     Result after send
+     ============================================================ -->
+{% if result %}
+<div style="background:#f0fff4;border:1px solid #28a745;border-radius:6px;
+            padding:22px;max-width:680px;margin-bottom:28px">
+  <h3 style="margin-top:0;color:#28a745;font-size:15px">&#10004; Broadcast Sent Successfully</h3>
+  <table style="width:100%;border-collapse:collapse">
+    <tr style="border-bottom:1px solid #c3e6cb">
+      <td style="padding:8px 4px;color:#555;font-weight:600;width:140px">Title</td>
+      <td style="padding:8px 4px">{{ result.title }}</td>
+    </tr>
+    <tr style="border-bottom:1px solid #c3e6cb">
+      <td style="padding:8px 4px;color:#555;font-weight:600">Message</td>
+      <td style="padding:8px 4px">{{ result.message }}</td>
+    </tr>
+    <tr style="border-bottom:1px solid #c3e6cb">
+      <td style="padding:8px 4px;color:#555;font-weight:600">Channel</td>
+      <td style="padding:8px 4px">{{ result.channel }}</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 4px;color:#555;font-weight:600">Recipients</td>
+      <td style="padding:8px 4px">
+        <span style="background:#28a745;color:#fff;padding:2px 12px;
+                     border-radius:10px;font-size:13px;font-weight:700">
+          {{ result.count }} users
+        </span>
+      </td>
+    </tr>
+  </table>
+</div>
+{% endif %}
+
+<!-- ============================================================
+     Quick Links
+     ============================================================ -->
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:18px;max-width:680px">
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <a href="{% url 'admin:notifications_notification_changelist' %}"
+       style="padding:8px 16px;background:#417690;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#8592; All Notifications
+    </a>
+    <a href="{{ dashboard_url }}"
+       style="padding:8px 16px;background:#28a745;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#128202; Dashboard
+    </a>
+  </div>
+</div>
+
+{% endblock %}

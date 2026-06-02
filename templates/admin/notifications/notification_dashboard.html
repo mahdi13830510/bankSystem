@@ -1,0 +1,220 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Notifications Dashboard{% endblock %}
+
+{% block content %}
+<h1>Notifications Dashboard</h1>
+
+<!-- ============================================================
+     Summary Cards
+     ============================================================ -->
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:28px">
+  {% for card in cards %}
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:18px 22px;min-width:120px;flex:1">
+    <div style="font-size:11px;color:#777;text-transform:uppercase;letter-spacing:.5px">{{ card.label }}</div>
+    <div style="font-size:30px;font-weight:bold;margin:6px 0;color:{{ card.color }}">{{ card.value }}</div>
+    {% if card.sub %}
+    <div style="font-size:12px;color:#999">{{ card.sub }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ============================================================
+     Status chart + Channel chart
+     ============================================================ -->
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+
+  <!-- Status Distribution -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px;flex:1;min-width:280px">
+    <h3 style="margin-top:0;margin-bottom:20px;font-size:15px;color:#333">Status Distribution</h3>
+    <div style="display:flex;gap:16px;align-items:flex-end;height:130px;margin-bottom:10px">
+      {% for bucket in status_buckets %}
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;justify-content:flex-end;height:100%">
+        <span style="font-size:13px;font-weight:700;color:{{ bucket.color }}">{{ bucket.count }}</span>
+        <div
+          title="{{ bucket.label }}: {{ bucket.count }}"
+          style="width:100%;background:{{ bucket.color }};height:{{ bucket.height }}px;
+                 min-height:4px;border-radius:4px 4px 0 0;cursor:default"
+          onmouseover="this.style.opacity='.75'"
+          onmouseout="this.style.opacity='1'"
+        ></div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:16px">
+      {% for bucket in status_buckets %}
+      <div style="flex:1;text-align:center">
+        <span style="display:inline-block;background:{{ bucket.color }};color:#fff;
+                     font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600">
+          {{ bucket.label }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Channel Distribution -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px;flex:1;min-width:280px">
+    <h3 style="margin-top:0;margin-bottom:20px;font-size:15px;color:#333">Channel Distribution</h3>
+    <div style="display:flex;gap:16px;align-items:flex-end;height:130px;margin-bottom:10px">
+      {% for bucket in channel_buckets %}
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;justify-content:flex-end;height:100%">
+        <span style="font-size:13px;font-weight:700;color:{{ bucket.color }}">{{ bucket.count }}</span>
+        <div
+          title="{{ bucket.label }}: {{ bucket.count }}"
+          style="width:100%;background:{{ bucket.color }};height:{{ bucket.height }}px;
+                 min-height:4px;border-radius:4px 4px 0 0;cursor:default"
+          onmouseover="this.style.opacity='.75'"
+          onmouseout="this.style.opacity='1'"
+        ></div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:16px">
+      {% for bucket in channel_buckets %}
+      <div style="flex:1;text-align:center">
+        <span style="display:inline-block;background:{{ bucket.color }};color:#fff;
+                     font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600">
+          {{ bucket.icon }} {{ bucket.label }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     Failed Notifications + Top Unread Users
+     ============================================================ -->
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+
+  <!-- Failed Notifications -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px;flex:1;min-width:320px">
+    <h3 style="margin-top:0;font-size:15px;color:#dc3545">
+      &#10060; Last Failed Notifications
+    </h3>
+    {% if failed_data %}
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:#fff3f3">
+          <th style="padding:8px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #f5c6cb">Title</th>
+          <th style="padding:8px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #f5c6cb">User</th>
+          <th style="padding:8px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #f5c6cb">Channel</th>
+          <th style="padding:8px 10px;text-align:right;font-size:12px;color:#555;border-bottom:2px solid #f5c6cb">Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for n in failed_data %}
+        <tr style="border-bottom:1px solid #f9f0f0">
+          <td style="padding:8px 10px">
+            <a href="{{ n.detail_url }}"
+               style="font-weight:600;color:#dc3545;text-decoration:none;font-size:13px">
+              {{ n.title }}
+            </a>
+          </td>
+          <td style="padding:8px 10px;font-size:13px;color:#333">{{ n.user }}</td>
+          <td style="padding:8px 10px">
+            <span style="background:{{ n.ch_color }};color:#fff;padding:2px 8px;
+                         border-radius:10px;font-size:10px;font-weight:600">
+              {{ n.channel }}
+            </span>
+          </td>
+          <td style="padding:8px 10px;text-align:right;font-size:11px;color:#999">
+            {{ n.created_at|date:"m-d H:i" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:#aaa;font-style:italic">No failed notifications. &#10004;</p>
+    {% endif %}
+    <div style="margin-top:12px">
+      <a href="{% url 'admin:notifications_notification_changelist' %}?status=FAILED"
+         style="font-size:12px;color:#dc3545;font-weight:600">View all failed &rarr;</a>
+    </div>
+  </div>
+
+  <!-- Top Users with Unread -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px;flex:1;min-width:280px">
+    <h3 style="margin-top:0;font-size:15px;color:#6f42c1">
+      &#128276; Users with Most Unread
+    </h3>
+    {% if top_unread_data %}
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:#f8f8f8">
+          <th style="padding:8px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #eee">#</th>
+          <th style="padding:8px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #eee">User</th>
+          <th style="padding:8px 10px;text-align:right;font-size:12px;color:#555;border-bottom:2px solid #eee">Unread</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in top_unread_data %}
+        <tr style="border-bottom:1px solid #f4f4f4">
+          <td style="padding:8px 10px;color:#aaa;font-size:13px">{{ forloop.counter }}</td>
+          <td style="padding:8px 10px">
+            <a href="{{ row.change_url }}"
+               style="font-weight:600;color:#333;text-decoration:none;font-size:13px">
+              {{ row.fullname }}
+            </a>
+            <br>
+            <span style="font-size:11px;color:#aaa;font-family:monospace">{{ row.phone }}</span>
+          </td>
+          <td style="padding:8px 10px;text-align:right">
+            <span style="background:#6f42c1;color:#fff;padding:2px 12px;
+                         border-radius:10px;font-size:12px;font-weight:700">
+              {{ row.count }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:#aaa;font-style:italic">No unread notifications. &#10004;</p>
+    {% endif %}
+    <div style="margin-top:12px">
+      <a href="{% url 'admin:notifications_notification_changelist' %}?is_read=0"
+         style="font-size:12px;color:#6f42c1;font-weight:600">View all unread &rarr;</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     Quick Actions
+     ============================================================ -->
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px">
+  <h3 style="margin-top:0;font-size:15px;color:#333">Quick Actions</h3>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <a href="{% url 'admin:notifications_notification_changelist' %}"
+       style="padding:8px 18px;background:#417690;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#8592; All Notifications
+    </a>
+    <a href="{{ broadcast_url }}"
+       style="padding:8px 18px;background:#6f42c1;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#128226; Broadcast
+    </a>
+    <a href="{% url 'admin:notifications_notification_changelist' %}?status=FAILED"
+       style="padding:8px 18px;background:#dc3545;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#10060; Failed
+    </a>
+    <a href="{% url 'admin:notifications_notification_changelist' %}?status=PENDING"
+       style="padding:8px 18px;background:#fd7e14;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#9203; Pending
+    </a>
+    <a href="{% url 'admin:notifications_notification_changelist' %}?is_read=0"
+       style="padding:8px 18px;background:#6f42c1;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#128276; Unread
+    </a>
+  </div>
+</div>
+
+{% endblock %}
