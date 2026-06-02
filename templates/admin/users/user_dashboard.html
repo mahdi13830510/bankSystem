@@ -1,0 +1,220 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Users Dashboard{% endblock %}
+
+{% block content %}
+<h1>Users Dashboard</h1>
+
+<!-- ============================================================
+     Summary Cards
+     ============================================================ -->
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:28px">
+  {% for card in cards %}
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:18px 22px;min-width:130px;flex:1">
+    <div style="font-size:11px;color:#777;text-transform:uppercase;letter-spacing:.5px">{{ card.label }}</div>
+    <div style="font-size:28px;font-weight:bold;margin:6px 0;color:{{ card.color }}">{{ card.value }}</div>
+    {% if card.sub %}
+    <div style="font-size:12px;color:#999">{{ card.sub }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ============================================================
+     Two bar charts side by side: Status + Role
+     ============================================================ -->
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+
+  <!-- Status Distribution -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px;flex:1;min-width:280px">
+    <h3 style="margin-top:0;margin-bottom:20px;font-size:15px;color:#333">User Status Distribution</h3>
+    <div style="display:flex;gap:14px;align-items:flex-end;height:130px;margin-bottom:10px">
+      {% for bucket in status_buckets %}
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;justify-content:flex-end;height:100%">
+        <span style="font-size:13px;font-weight:700;color:{{ bucket.color }}">{{ bucket.count }}</span>
+        <div
+          title="{{ bucket.label }}: {{ bucket.count }}"
+          style="width:100%;background:{{ bucket.color }};height:{{ bucket.height }}px;
+                 min-height:4px;border-radius:4px 4px 0 0;cursor:default"
+          onmouseover="this.style.opacity='.75'"
+          onmouseout="this.style.opacity='1'"
+        ></div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:14px">
+      {% for bucket in status_buckets %}
+      <div style="flex:1;text-align:center">
+        <span style="display:inline-block;background:{{ bucket.color }};color:#fff;
+                     font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600;letter-spacing:.3px">
+          {{ bucket.label }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Role Distribution -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px;flex:1;min-width:280px">
+    <h3 style="margin-top:0;margin-bottom:20px;font-size:15px;color:#333">User Role Distribution</h3>
+    <div style="display:flex;gap:14px;align-items:flex-end;height:130px;margin-bottom:10px">
+      {% for bucket in role_buckets %}
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;justify-content:flex-end;height:100%">
+        <span style="font-size:13px;font-weight:700;color:{{ bucket.color }}">{{ bucket.count }}</span>
+        <div
+          title="{{ bucket.label }}: {{ bucket.count }}"
+          style="width:100%;background:{{ bucket.color }};height:{{ bucket.height }}px;
+                 min-height:4px;border-radius:4px 4px 0 0;cursor:default"
+          onmouseover="this.style.opacity='.75'"
+          onmouseout="this.style.opacity='1'"
+        ></div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:14px">
+      {% for bucket in role_buckets %}
+      <div style="flex:1;text-align:center">
+        <span style="display:inline-block;background:{{ bucket.color }};color:#fff;
+                     font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600;letter-spacing:.3px">
+          {{ bucket.label }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="margin-top:14px;font-size:12px;color:#999">
+      Superusers: <strong style="color:#dc3545">{{ superuser_count }}</strong>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     Two tables: Recent Registrations + High-Risk Users
+     ============================================================ -->
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+
+  <!-- Recent Registrations -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px;flex:1;min-width:320px">
+    <h3 style="margin-top:0;font-size:15px;color:#333">Recent Registrations</h3>
+    {% if recent_data %}
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:#f8f8f8">
+          <th style="padding:9px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #eee">Name</th>
+          <th style="padding:9px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #eee">Phone</th>
+          <th style="padding:9px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #eee">Status</th>
+          <th style="padding:9px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #eee">Role</th>
+          <th style="padding:9px 10px;text-align:right;font-size:12px;color:#555;border-bottom:2px solid #eee">Joined</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in recent_data %}
+        <tr style="border-bottom:1px solid #f4f4f4">
+          <td style="padding:9px 10px">
+            <a href="{{ u.change_url }}" style="font-weight:600;color:#333;text-decoration:none">{{ u.fullname }}</a>
+          </td>
+          <td style="padding:9px 10px;font-family:monospace;color:#6c757d;font-size:13px">{{ u.phone }}</td>
+          <td style="padding:9px 10px">
+            <span style="background:{{ u.s_color }};color:#fff;padding:2px 8px;border-radius:10px;
+                         font-size:10px;font-weight:600;letter-spacing:.4px">
+              {{ u.status|upper }}
+            </span>
+          </td>
+          <td style="padding:9px 10px">
+            <span style="background:{{ u.r_color }};color:#fff;padding:2px 8px;border-radius:10px;
+                         font-size:10px;font-weight:600;letter-spacing:.4px">
+              {{ u.role|upper }}
+            </span>
+          </td>
+          <td style="padding:9px 10px;text-align:right;font-size:12px;color:#999">
+            {{ u.date_joined|date:"Y-m-d" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:#aaa;font-style:italic">No users yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- High-Risk Users (failed login >= 3) -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px;flex:1;min-width:280px">
+    <h3 style="margin-top:0;font-size:15px;color:#dc3545">
+      &#9888; High-Risk Users
+      <span style="font-size:12px;color:#999;font-weight:400;margin-left:6px">(failed logins &ge; 3)</span>
+    </h3>
+    {% if risky_data %}
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:#f8f8f8">
+          <th style="padding:9px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #eee">Name</th>
+          <th style="padding:9px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #eee">Phone</th>
+          <th style="padding:9px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #eee">Status</th>
+          <th style="padding:9px 10px;text-align:right;font-size:12px;color:#555;border-bottom:2px solid #eee">Attempts</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in risky_data %}
+        <tr style="border-bottom:1px solid #f4f4f4">
+          <td style="padding:9px 10px">
+            <a href="{{ u.change_url }}" style="font-weight:600;color:#333;text-decoration:none">{{ u.fullname }}</a>
+          </td>
+          <td style="padding:9px 10px;font-family:monospace;color:#6c757d;font-size:13px">{{ u.phone }}</td>
+          <td style="padding:9px 10px">
+            <span style="background:{{ u.s_color }};color:#fff;padding:2px 8px;border-radius:10px;
+                         font-size:10px;font-weight:600;letter-spacing:.4px">
+              {{ u.status|upper }}
+            </span>
+          </td>
+          <td style="padding:9px 10px;text-align:right">
+            <span style="background:#dc3545;color:#fff;padding:2px 10px;border-radius:10px;
+                         font-size:12px;font-weight:700">
+              {{ u.attempts }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:#aaa;font-style:italic">No high-risk users. &#10004;</p>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- ============================================================
+     Quick Actions
+     ============================================================ -->
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px">
+  <h3 style="margin-top:0;font-size:15px;color:#333">Quick Actions</h3>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <a href="{% url 'admin:users_user_changelist' %}"
+       style="padding:8px 18px;background:#417690;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#8592; User List
+    </a>
+    <a href="{% url 'admin:users_user_add' %}"
+       style="padding:8px 18px;background:#28a745;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      + Add User
+    </a>
+    <a href="{% url 'admin:users_userdevice_changelist' %}"
+       style="padding:8px 18px;background:#6f42c1;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#128241; All Devices
+    </a>
+    <a href="{% url 'admin:users_user_changelist' %}?status=pending"
+       style="padding:8px 18px;background:#fd7e14;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#9203; Pending Users
+    </a>
+    <a href="{% url 'admin:users_user_changelist' %}?status=blocked"
+       style="padding:8px 18px;background:#dc3545;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#128274; Blocked Users
+    </a>
+  </div>
+</div>
+
+{% endblock %}
