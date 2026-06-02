@@ -1,0 +1,256 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Audit Log Dashboard{% endblock %}
+
+{% block content %}
+<h1>Audit Log Dashboard</h1>
+
+<!-- ============================================================
+     Summary Cards
+     ============================================================ -->
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:28px">
+  {% for card in cards %}
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:18px 22px;min-width:160px;flex:1">
+    <div style="font-size:11px;color:#777;text-transform:uppercase;letter-spacing:.5px">{{ card.label }}</div>
+    <div style="font-size:32px;font-weight:bold;margin:6px 0;color:{{ card.color }}">{{ card.value }}</div>
+    {% if card.sub %}
+    <div style="font-size:12px;color:#999">{{ card.sub }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ============================================================
+     Severity Bar Chart + Top Actions
+     ============================================================ -->
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+
+  <!-- Severity Distribution -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px;flex:0 0 260px">
+    <h3 style="margin-top:0;margin-bottom:20px;font-size:15px;color:#333">Severity Distribution</h3>
+    <div style="display:flex;gap:20px;align-items:flex-end;height:130px;margin-bottom:10px">
+      {% for bucket in severity_buckets %}
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;justify-content:flex-end;height:100%">
+        <span style="font-size:14px;font-weight:700;color:{{ bucket.color }}">{{ bucket.count }}</span>
+        <div
+          title="{{ bucket.label }}: {{ bucket.count }}"
+          style="width:100%;background:{{ bucket.color }};height:{{ bucket.height }}px;
+                 min-height:4px;border-radius:4px 4px 0 0;cursor:default"
+          onmouseover="this.style.opacity='.75'"
+          onmouseout="this.style.opacity='1'"
+        ></div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:20px">
+      {% for bucket in severity_buckets %}
+      <div style="flex:1;text-align:center">
+        <span style="display:inline-block;background:{{ bucket.color }};color:#fff;
+                     font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600">
+          {{ bucket.label }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Top Actions horizontal bar chart -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px;flex:1;min-width:300px">
+    <h3 style="margin-top:0;font-size:15px;color:#333">Top 10 Actions by Frequency</h3>
+    {% if top_actions %}
+    <div style="display:flex;flex-direction:column;gap:10px">
+      {% for row in top_actions %}
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:monospace;font-size:12px;min-width:220px;
+                     {% if row.security %}color:#dc3545;font-weight:700{% else %}color:#333{% endif %}">
+          {% if row.security %}&#9888; {% endif %}{{ row.action }}
+        </span>
+        <div style="flex:1;background:#eee;border-radius:4px;height:12px;overflow:hidden">
+          <div style="background:{% if row.security %}#dc3545{% else %}#417690{% endif %};
+                      height:100%;width:{{ row.width }}%;border-radius:4px;
+                      transition:width .3s"></div>
+        </div>
+        <span style="font-size:12px;font-weight:700;color:#555;min-width:36px;text-align:right">
+          {{ row.count }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:#aaa">
+      <span style="color:#dc3545;font-weight:600">&#9888; Red</span> = security-sensitive action
+    </div>
+    {% else %}
+    <p style="color:#aaa;font-style:italic">No logs yet.</p>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- ============================================================
+     Critical Logs + Warning Logs
+     ============================================================ -->
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+
+  <!-- Last Critical Logs -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px;flex:1;min-width:320px">
+    <h3 style="margin-top:0;font-size:15px;color:#dc3545">
+      &#128680; Last Critical Logs
+    </h3>
+    {% if critical_data %}
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:#fff3f3">
+          <th style="padding:8px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #f5c6cb">Action</th>
+          <th style="padding:8px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #f5c6cb">Actor</th>
+          <th style="padding:8px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #f5c6cb">IP</th>
+          <th style="padding:8px 10px;text-align:right;font-size:12px;color:#555;border-bottom:2px solid #f5c6cb">Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in critical_data %}
+        <tr style="border-bottom:1px solid #f9f0f0">
+          <td style="padding:8px 10px">
+            <a href="{{ log.detail_url }}"
+               style="font-family:monospace;font-size:12px;font-weight:700;
+                      color:#dc3545;text-decoration:none">
+              {{ log.action }}
+            </a>
+          </td>
+          <td style="padding:8px 10px;font-size:13px;color:#333">{{ log.actor }}</td>
+          <td style="padding:8px 10px;font-family:monospace;font-size:12px;color:#6c757d">{{ log.ip }}</td>
+          <td style="padding:8px 10px;text-align:right;font-size:11px;color:#999">
+            {{ log.created_at|date:"m-d H:i" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:#aaa;font-style:italic">No critical logs. &#10004;</p>
+    {% endif %}
+    <div style="margin-top:12px">
+      <a href="{% url 'admin:auditlogs_auditlog_changelist' %}?severity=CRITICAL"
+         style="font-size:12px;color:#dc3545;font-weight:600">View all critical logs &rarr;</a>
+    </div>
+  </div>
+
+  <!-- Last Warning Logs -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px;flex:1;min-width:320px">
+    <h3 style="margin-top:0;font-size:15px;color:#fd7e14">
+      &#9888; Last Warning Logs
+    </h3>
+    {% if warning_data %}
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:#fffaf3">
+          <th style="padding:8px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #ffe0b2">Action</th>
+          <th style="padding:8px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #ffe0b2">Actor</th>
+          <th style="padding:8px 10px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #ffe0b2">IP</th>
+          <th style="padding:8px 10px;text-align:right;font-size:12px;color:#555;border-bottom:2px solid #ffe0b2">Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in warning_data %}
+        <tr style="border-bottom:1px solid #fdf6ec">
+          <td style="padding:8px 10px">
+            <a href="{{ log.detail_url }}"
+               style="font-family:monospace;font-size:12px;font-weight:700;
+                      color:#fd7e14;text-decoration:none">
+              {{ log.action }}
+            </a>
+          </td>
+          <td style="padding:8px 10px;font-size:13px;color:#333">{{ log.actor }}</td>
+          <td style="padding:8px 10px;font-family:monospace;font-size:12px;color:#6c757d">{{ log.ip }}</td>
+          <td style="padding:8px 10px;text-align:right;font-size:11px;color:#999">
+            {{ log.created_at|date:"m-d H:i" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:#aaa;font-style:italic">No warning logs. &#10004;</p>
+    {% endif %}
+    <div style="margin-top:12px">
+      <a href="{% url 'admin:auditlogs_auditlog_changelist' %}?severity=WARNING"
+         style="font-size:12px;color:#fd7e14;font-weight:600">View all warning logs &rarr;</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     Top Active Actors
+     ============================================================ -->
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px;margin-bottom:28px">
+  <h3 style="margin-top:0;font-size:15px;color:#333">Top 10 Most Active Actors</h3>
+  {% if top_actors %}
+  <table style="width:100%;border-collapse:collapse">
+    <thead>
+      <tr style="background:#f8f8f8">
+        <th style="padding:9px 12px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #eee">#</th>
+        <th style="padding:9px 12px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #eee">Name</th>
+        <th style="padding:9px 12px;text-align:left;font-size:12px;color:#555;border-bottom:2px solid #eee">Phone</th>
+        <th style="padding:9px 12px;text-align:right;font-size:12px;color:#555;border-bottom:2px solid #eee">Log Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for actor in top_actors %}
+      <tr style="border-bottom:1px solid #f4f4f4">
+        <td style="padding:9px 12px;color:#aaa;font-size:13px">{{ forloop.counter }}</td>
+        <td style="padding:9px 12px">
+          <a href="{{ actor.change_url }}"
+             style="font-weight:600;color:#333;text-decoration:none">
+            {{ actor.fullname }}
+          </a>
+        </td>
+        <td style="padding:9px 12px;font-family:monospace;font-size:13px;color:#6c757d">{{ actor.phone }}</td>
+        <td style="padding:9px 12px;text-align:right">
+          <span style="background:#417690;color:#fff;padding:2px 12px;
+                       border-radius:10px;font-size:12px;font-weight:700">
+            {{ actor.count }}
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:#aaa;font-style:italic">No actor data available.</p>
+  {% endif %}
+</div>
+
+<!-- ============================================================
+     Quick Actions
+     ============================================================ -->
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px">
+  <h3 style="margin-top:0;font-size:15px;color:#333">Quick Filters</h3>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <a href="{% url 'admin:auditlogs_auditlog_changelist' %}"
+       style="padding:8px 18px;background:#417690;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#8592; All Logs
+    </a>
+    <a href="{% url 'admin:auditlogs_auditlog_changelist' %}?severity=CRITICAL"
+       style="padding:8px 18px;background:#dc3545;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#128680; Critical Only
+    </a>
+    <a href="{% url 'admin:auditlogs_auditlog_changelist' %}?severity=WARNING"
+       style="padding:8px 18px;background:#fd7e14;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#9888; Warnings Only
+    </a>
+    <a href="{% url 'admin:auditlogs_auditlog_changelist' %}?action=LOGIN_FAILED"
+       style="padding:8px 18px;background:#6c757d;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      Failed Logins
+    </a>
+    <a href="{% url 'admin:auditlogs_auditlog_changelist' %}?action=FRAUD_DECISION"
+       style="padding:8px 18px;background:#6f42c1;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      Fraud Decisions
+    </a>
+  </div>
+</div>
+
+{% endblock %}
