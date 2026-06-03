@@ -1,0 +1,350 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Transactions Dashboard{% endblock %}
+
+{% block content %}
+<h1>Transactions Dashboard</h1>
+
+<!-- ============================================================
+     Summary Cards
+     ============================================================ -->
+<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px">
+  {% for card in cards %}
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;
+              padding:16px 20px;min-width:130px;flex:1">
+    <div style="font-size:10px;color:#777;text-transform:uppercase;letter-spacing:.5px">
+      {{ card.label }}
+    </div>
+    <div style="font-size:22px;font-weight:bold;margin:5px 0;color:{{ card.color }}">
+      {{ card.value }}
+    </div>
+    {% if card.sub %}
+    <div style="font-size:11px;color:#aaa">{{ card.sub }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ============================================================
+     Status chart + Type horizontal bar chart
+     ============================================================ -->
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+
+  <!-- Status Distribution -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;
+              padding:22px;flex:0 0 320px">
+    <h3 style="margin-top:0;margin-bottom:18px;font-size:15px;color:#333">
+      Status Distribution
+    </h3>
+    <div style="display:flex;gap:12px;align-items:flex-end;height:130px;margin-bottom:10px">
+      {% for bucket in status_buckets %}
+      <div style="flex:1;display:flex;flex-direction:column;
+                  align-items:center;gap:5px;justify-content:flex-end;height:100%">
+        <span style="font-size:12px;font-weight:700;color:{{ bucket.color }}">
+          {{ bucket.count }}
+        </span>
+        <div
+          title="{{ bucket.label }}: {{ bucket.count }}"
+          style="width:100%;background:{{ bucket.color }};height:{{ bucket.height }}px;
+                 min-height:4px;border-radius:4px 4px 0 0;cursor:default"
+          onmouseover="this.style.opacity='.75'"
+          onmouseout="this.style.opacity='1'"
+        ></div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:12px">
+      {% for bucket in status_buckets %}
+      <div style="flex:1;text-align:center">
+        <span style="display:inline-block;background:{{ bucket.color }};color:#fff;
+                     font-size:9px;padding:2px 4px;border-radius:8px;font-weight:600">
+          {{ bucket.label }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Type Distribution — horizontal bars -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;
+              padding:22px;flex:1;min-width:320px">
+    <h3 style="margin-top:0;font-size:15px;color:#333">
+      Transaction Type Breakdown
+    </h3>
+    {% if type_data %}
+    <div style="display:flex;flex-direction:column;gap:10px">
+      {% for row in type_data %}
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="min-width:190px;font-size:12px;font-weight:600;color:#333">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;
+                       background:{{ row.color }};margin-right:5px;vertical-align:middle">
+          </span>
+          {{ row.label }}
+        </span>
+        <div style="flex:1;background:#eee;border-radius:4px;height:12px;overflow:hidden">
+          <div style="background:{{ row.color }};height:100%;width:{{ row.width }}%;
+                      border-radius:4px"></div>
+        </div>
+        <span style="font-size:12px;font-weight:700;color:#555;min-width:40px;text-align:right">
+          {{ row.count }}
+        </span>
+        <span style="font-size:11px;color:#aaa;min-width:90px;text-align:right;
+                     font-family:monospace">
+          {{ row.volume|floatformat:2 }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:#aaa;text-align:right">
+      count &nbsp;&nbsp;&nbsp; volume
+    </div>
+    {% else %}
+    <p style="color:#aaa;font-style:italic">No transactions yet.</p>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- ============================================================
+     Failed + Blocked transactions
+     ============================================================ -->
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+
+  <!-- Failed Transactions -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;
+              padding:22px;flex:1;min-width:320px">
+    <h3 style="margin-top:0;font-size:15px;color:#dc3545">
+      &#10060; Last Failed Transactions
+    </h3>
+    {% if failed_data %}
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:#fff3f3">
+          <th style="padding:8px 8px;text-align:left;font-size:11px;color:#555;
+                     border-bottom:2px solid #f5c6cb">Reference</th>
+          <th style="padding:8px 8px;text-align:left;font-size:11px;color:#555;
+                     border-bottom:2px solid #f5c6cb">Type</th>
+          <th style="padding:8px 8px;text-align:left;font-size:11px;color:#555;
+                     border-bottom:2px solid #f5c6cb">Customer</th>
+          <th style="padding:8px 8px;text-align:right;font-size:11px;color:#555;
+                     border-bottom:2px solid #f5c6cb">Amount</th>
+          <th style="padding:8px 8px;text-align:right;font-size:11px;color:#555;
+                     border-bottom:2px solid #f5c6cb">Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in failed_data %}
+        <tr style="border-bottom:1px solid #f9f0f0">
+          <td style="padding:8px 8px">
+            <a href="{{ t.detail_url }}"
+               style="font-family:monospace;font-size:11px;color:#dc3545;
+                      text-decoration:none;font-weight:600">
+              {{ t.ref|slice:":16" }}…
+            </a>
+          </td>
+          <td style="padding:8px 8px">
+            <span style="background:{{ t.t_color }};color:#fff;padding:2px 6px;
+                         border-radius:8px;font-size:10px;font-weight:600">
+              {{ t.type }}
+            </span>
+          </td>
+          <td style="padding:8px 8px;font-size:12px;color:#333">
+            {{ t.customer }}<br>
+            <span style="font-size:10px;color:#aaa;font-family:monospace">
+              {{ t.account }}
+            </span>
+          </td>
+          <td style="padding:8px 8px;text-align:right;font-family:monospace;
+                     font-weight:700;font-size:13px">
+            {{ t.amount }}
+          </td>
+          <td style="padding:8px 8px;text-align:right;font-size:11px;color:#999">
+            {{ t.created_at|date:"m-d H:i" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:#aaa;font-style:italic">No failed transactions. &#10004;</p>
+    {% endif %}
+    <div style="margin-top:12px">
+      <a href="{% url 'admin:transactions_transaction_changelist' %}?status=FAILED"
+         style="font-size:12px;color:#dc3545;font-weight:600">
+        View all failed &rarr;
+      </a>
+    </div>
+  </div>
+
+  <!-- Blocked Transactions -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;
+              padding:22px;flex:1;min-width:320px">
+    <h3 style="margin-top:0;font-size:15px;color:#6c757d">
+      &#128683; Last Blocked Transactions
+      <span style="font-size:12px;font-weight:400;color:#aaa">(by fraud system)</span>
+    </h3>
+    {% if blocked_data %}
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:#f8f8f8">
+          <th style="padding:8px 8px;text-align:left;font-size:11px;color:#555;
+                     border-bottom:2px solid #eee">Reference</th>
+          <th style="padding:8px 8px;text-align:left;font-size:11px;color:#555;
+                     border-bottom:2px solid #eee">Type</th>
+          <th style="padding:8px 8px;text-align:left;font-size:11px;color:#555;
+                     border-bottom:2px solid #eee">Customer</th>
+          <th style="padding:8px 8px;text-align:right;font-size:11px;color:#555;
+                     border-bottom:2px solid #eee">Amount</th>
+          <th style="padding:8px 8px;text-align:right;font-size:11px;color:#555;
+                     border-bottom:2px solid #eee">Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in blocked_data %}
+        <tr style="border-bottom:1px solid #f4f4f4">
+          <td style="padding:8px 8px">
+            <a href="{{ t.detail_url }}"
+               style="font-family:monospace;font-size:11px;color:#6c757d;
+                      text-decoration:none;font-weight:600">
+              {{ t.ref|slice:":16" }}…
+            </a>
+          </td>
+          <td style="padding:8px 8px">
+            <span style="background:{{ t.t_color }};color:#fff;padding:2px 6px;
+                         border-radius:8px;font-size:10px;font-weight:600">
+              {{ t.type }}
+            </span>
+          </td>
+          <td style="padding:8px 8px;font-size:12px;color:#333">
+            {{ t.customer }}<br>
+            <span style="font-size:10px;color:#aaa;font-family:monospace">
+              {{ t.account }}
+            </span>
+          </td>
+          <td style="padding:8px 8px;text-align:right;font-family:monospace;
+                     font-weight:700;font-size:13px">
+            {{ t.amount }}
+          </td>
+          <td style="padding:8px 8px;text-align:right;font-size:11px;color:#999">
+            {{ t.created_at|date:"m-d H:i" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:#aaa;font-style:italic">No blocked transactions. &#10004;</p>
+    {% endif %}
+    <div style="margin-top:12px">
+      <a href="{% url 'admin:transactions_transaction_changelist' %}?status=BLOCKED"
+         style="font-size:12px;color:#6c757d;font-weight:600">
+        View all blocked &rarr;
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     Top Accounts by Transaction Count
+     ============================================================ -->
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;
+            padding:22px;margin-bottom:28px">
+  <h3 style="margin-top:0;font-size:15px;color:#333">
+    Top 10 Accounts by Transaction Count
+  </h3>
+  {% if top_accounts_data %}
+  <table style="width:100%;border-collapse:collapse">
+    <thead>
+      <tr style="background:#f8f8f8">
+        <th style="padding:9px 12px;text-align:left;font-size:12px;color:#555;
+                   border-bottom:2px solid #eee">#</th>
+        <th style="padding:9px 12px;text-align:left;font-size:12px;color:#555;
+                   border-bottom:2px solid #eee">Account</th>
+        <th style="padding:9px 12px;text-align:left;font-size:12px;color:#555;
+                   border-bottom:2px solid #eee">Customer</th>
+        <th style="padding:9px 12px;text-align:right;font-size:12px;color:#555;
+                   border-bottom:2px solid #eee">Transactions</th>
+        <th style="padding:9px 12px;text-align:right;font-size:12px;color:#555;
+                   border-bottom:2px solid #eee">Volume</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in top_accounts_data %}
+      <tr style="border-bottom:1px solid #f4f4f4">
+        <td style="padding:9px 12px;color:#aaa;font-size:13px">
+          {{ forloop.counter }}
+        </td>
+        <td style="padding:9px 12px">
+          <a href="{{ row.account_url }}"
+             style="font-family:monospace;font-size:13px;font-weight:600;
+                    color:#417690;text-decoration:none">
+            {{ row.account_number }}
+          </a>
+        </td>
+        <td style="padding:9px 12px;font-size:13px;color:#333;font-weight:600">
+          {{ row.customer }}
+        </td>
+        <td style="padding:9px 12px;text-align:right">
+          <span style="background:#417690;color:#fff;padding:2px 12px;
+                       border-radius:10px;font-size:12px;font-weight:700">
+            {{ row.count }}
+          </span>
+        </td>
+        <td style="padding:9px 12px;text-align:right;font-family:monospace;
+                   font-weight:700;font-size:13px;color:#28a745">
+          {{ row.volume|floatformat:2 }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:#aaa;font-style:italic">No transaction data.</p>
+  {% endif %}
+</div>
+
+<!-- ============================================================
+     Quick Filters
+     ============================================================ -->
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px">
+  <h3 style="margin-top:0;font-size:15px;color:#333">Quick Filters</h3>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <a href="{% url 'admin:transactions_transaction_changelist' %}"
+       style="padding:8px 16px;background:#417690;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#8592; All Transactions
+    </a>
+    <a href="{% url 'admin:transactions_transaction_changelist' %}?status=FAILED"
+       style="padding:8px 16px;background:#dc3545;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#10060; Failed
+    </a>
+    <a href="{% url 'admin:transactions_transaction_changelist' %}?status=BLOCKED"
+       style="padding:8px 16px;background:#6c757d;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#128683; Blocked
+    </a>
+    <a href="{% url 'admin:transactions_transaction_changelist' %}?status=PENDING"
+       style="padding:8px 16px;background:#fd7e14;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#9203; Pending
+    </a>
+    <a href="{% url 'admin:transactions_transaction_changelist' %}?status=REVERSED"
+       style="padding:8px 16px;background:#6f42c1;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#8635; Reversed
+    </a>
+    <a href="{% url 'admin:transactions_transaction_changelist' %}?type=IBAN_TRANSFER"
+       style="padding:8px 16px;background:#6f42c1;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      IBAN Transfers
+    </a>
+    <a href="{% url 'admin:transactions_transaction_changelist' %}?type=CARD_TO_CARD"
+       style="padding:8px 16px;background:#417690;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      Card to Card
+    </a>
+  </div>
+</div>
+
+{% endblock %}
