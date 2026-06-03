@@ -1,0 +1,24 @@
+{% extends "admin/change_form.html" %}
+
+{% block object-tools-items %}
+  {{ block.super }}
+  {% if approve_url %}
+  <li>
+    <a href="{{ approve_url }}"
+       onclick="return confirm('Approve this loan request? This will disburse funds immediately.')"
+       style="background:#28a745;color:#fff;padding:6px 16px;border-radius:4px;
+              text-decoration:none;font-size:13px;font-weight:600;
+              display:inline-block">
+      ✔ Approve
+    </a>
+  </li>
+  <li>
+    <a href="{{ reject_url }}"
+       style="background:#dc3545;color:#fff;padding:6px 16px;border-radius:4px;
+              text-decoration:none;font-size:13px;font-weight:600;
+              display:inline-block">
+      ✘ Reject
+    </a>
+  </li>
+  {% endif %}
+{% endblock %}

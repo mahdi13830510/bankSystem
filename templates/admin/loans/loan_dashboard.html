@@ -1,0 +1,342 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Loans Dashboard{% endblock %}
+
+{% block content %}
+<h1>Loans Dashboard</h1>
+
+<!-- ============================================================
+     Summary Cards
+     ============================================================ -->
+<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px">
+  {% for card in cards %}
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;
+              padding:16px 20px;min-width:130px;flex:1">
+    <div style="font-size:10px;color:#777;text-transform:uppercase;letter-spacing:.5px">
+      {{ card.label }}
+    </div>
+    <div style="font-size:22px;font-weight:bold;margin:5px 0;color:{{ card.color }}">
+      {{ card.value }}
+    </div>
+    {% if card.sub %}
+    <div style="font-size:11px;color:#aaa">{{ card.sub }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ============================================================
+     Two bar charts: Request Status + Loan Status
+     ============================================================ -->
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+
+  <!-- Request Status -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;
+              padding:22px;flex:1;min-width:260px">
+    <h3 style="margin-top:0;margin-bottom:18px;font-size:15px;color:#333">
+      Loan Request Status
+    </h3>
+    <div style="display:flex;gap:14px;align-items:flex-end;height:130px;margin-bottom:10px">
+      {% for bucket in req_buckets %}
+      <div style="flex:1;display:flex;flex-direction:column;
+                  align-items:center;gap:5px;justify-content:flex-end;height:100%">
+        <span style="font-size:12px;font-weight:700;color:{{ bucket.color }}">
+          {{ bucket.count }}
+        </span>
+        <div
+          title="{{ bucket.label }}: {{ bucket.count }}"
+          style="width:100%;background:{{ bucket.color }};height:{{ bucket.height }}px;
+                 min-height:4px;border-radius:4px 4px 0 0;cursor:default"
+          onmouseover="this.style.opacity='.75'"
+          onmouseout="this.style.opacity='1'"
+        ></div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:14px">
+      {% for bucket in req_buckets %}
+      <div style="flex:1;text-align:center">
+        <span style="display:inline-block;background:{{ bucket.color }};color:#fff;
+                     font-size:9px;padding:2px 4px;border-radius:8px;font-weight:600">
+          {{ bucket.label }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Loan Status -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;
+              padding:22px;flex:1;min-width:260px">
+    <h3 style="margin-top:0;margin-bottom:18px;font-size:15px;color:#333">
+      Active Loan Status
+    </h3>
+    <div style="display:flex;gap:14px;align-items:flex-end;height:130px;margin-bottom:10px">
+      {% for bucket in loan_buckets %}
+      <div style="flex:1;display:flex;flex-direction:column;
+                  align-items:center;gap:5px;justify-content:flex-end;height:100%">
+        <span style="font-size:12px;font-weight:700;color:{{ bucket.color }}">
+          {{ bucket.count }}
+        </span>
+        <div
+          title="{{ bucket.label }}: {{ bucket.count }}"
+          style="width:100%;background:{{ bucket.color }};height:{{ bucket.height }}px;
+                 min-height:4px;border-radius:4px 4px 0 0;cursor:default"
+          onmouseover="this.style.opacity='.75'"
+          onmouseout="this.style.opacity='1'"
+        ></div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:14px">
+      {% for bucket in loan_buckets %}
+      <div style="flex:1;text-align:center">
+        <span style="display:inline-block;background:{{ bucket.color }};color:#fff;
+                     font-size:9px;padding:2px 4px;border-radius:8px;font-weight:600">
+          {{ bucket.label }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Type Breakdown — horizontal bars -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;
+              padding:22px;flex:1;min-width:260px">
+    <h3 style="margin-top:0;font-size:15px;color:#333">Loan Type Breakdown</h3>
+    {% if type_data %}
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
+      {% for row in type_data %}
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="min-width:90px;font-size:13px;font-weight:600;color:#333">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;
+                       background:{{ row.color }};margin-right:5px;vertical-align:middle">
+          </span>
+          {{ row.type }}
+        </span>
+        <div style="flex:1;background:#eee;border-radius:4px;height:12px;overflow:hidden">
+          <div style="background:{{ row.color }};height:100%;
+                      width:{{ row.width }}%;border-radius:4px"></div>
+        </div>
+        <span style="font-size:12px;font-weight:700;color:#555;min-width:30px;
+                     text-align:right">
+          {{ row.count }}
+        </span>
+        <span style="font-size:11px;color:#aaa;min-width:80px;text-align:right;
+                     font-family:monospace">
+          {{ row.volume|floatformat:0 }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:#aaa;text-align:right">
+      count &nbsp;&nbsp; volume
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- ============================================================
+     Pending Action Queue
+     ============================================================ -->
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;
+            padding:22px;margin-bottom:28px">
+  <h3 style="margin-top:0;font-size:15px;color:#fd7e14">
+    &#9203; Requests Awaiting Action
+    <span style="font-size:12px;font-weight:400;color:#aaa;margin-left:6px">
+      (PENDING + UNDER REVIEW — oldest first)
+    </span>
+  </h3>
+  {% if pending_data %}
+  <table style="width:100%;border-collapse:collapse">
+    <thead>
+      <tr style="background:#fffaf3">
+        <th style="padding:9px 10px;text-align:left;font-size:12px;color:#555;
+                   border-bottom:2px solid #ffe0b2">Customer</th>
+        <th style="padding:9px 10px;text-align:left;font-size:12px;color:#555;
+                   border-bottom:2px solid #ffe0b2">Type</th>
+        <th style="padding:9px 10px;text-align:right;font-size:12px;color:#555;
+                   border-bottom:2px solid #ffe0b2">Amount</th>
+        <th style="padding:9px 10px;text-align:center;font-size:12px;color:#555;
+                   border-bottom:2px solid #ffe0b2">Months</th>
+        <th style="padding:9px 10px;text-align:center;font-size:12px;color:#555;
+                   border-bottom:2px solid #ffe0b2">Risk</th>
+        <th style="padding:9px 10px;text-align:center;font-size:12px;color:#555;
+                   border-bottom:2px solid #ffe0b2">Status</th>
+        <th style="padding:9px 10px;text-align:right;font-size:12px;color:#555;
+                   border-bottom:2px solid #ffe0b2">Date</th>
+        <th style="padding:9px 10px;text-align:center;font-size:12px;color:#555;
+                   border-bottom:2px solid #ffe0b2">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in pending_data %}
+      <tr style="border-bottom:1px solid #fdf6ec">
+        <td style="padding:9px 10px">
+          <a href="{{ r.change_url }}"
+             style="font-weight:600;color:#333;text-decoration:none">
+            {{ r.customer }}
+          </a>
+          <br>
+          <span style="font-size:11px;color:#aaa;font-family:monospace">
+            {{ r.phone }}
+          </span>
+        </td>
+        <td style="padding:9px 10px">
+          <span style="background:{{ r.t_color }};color:#fff;padding:2px 8px;
+                       border-radius:10px;font-size:11px;font-weight:600">
+            {{ r.loan_type }}
+          </span>
+        </td>
+        <td style="padding:9px 10px;text-align:right;font-family:monospace;
+                   font-weight:700">
+          {{ r.amount }}
+        </td>
+        <td style="padding:9px 10px;text-align:center;color:#555">
+          {{ r.duration }}
+        </td>
+        <td style="padding:9px 10px;text-align:center">
+          <span style="font-weight:700;color:{{ r.risk_color }}">
+            {{ r.risk_score }}
+          </span>
+        </td>
+        <td style="padding:9px 10px;text-align:center">
+          <span style="background:{{ r.s_color }};color:#fff;padding:2px 8px;
+                       border-radius:10px;font-size:10px;font-weight:600">
+            {{ r.status }}
+          </span>
+        </td>
+        <td style="padding:9px 10px;text-align:right;font-size:11px;color:#999">
+          {{ r.created_at|date:"Y-m-d" }}
+        </td>
+        <td style="padding:9px 10px;text-align:center">
+          <div style="display:flex;gap:6px;justify-content:center">
+            <a href="{{ r.approve_url }}"
+               onclick="return confirm('Approve loan for {{ r.customer }}?')"
+               style="background:#28a745;color:#fff;padding:4px 12px;border-radius:4px;
+                      text-decoration:none;font-size:12px;font-weight:600">
+              ✔
+            </a>
+            <a href="{{ r.reject_url }}"
+               style="background:#dc3545;color:#fff;padding:4px 12px;border-radius:4px;
+                      text-decoration:none;font-size:12px;font-weight:600">
+              ✘
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div style="margin-top:12px">
+    <a href="{% url 'admin:loans_loanrequest_changelist' %}?status=PENDING"
+       style="font-size:12px;color:#fd7e14;font-weight:600">
+      View all pending &rarr;
+    </a>
+    &nbsp;&nbsp;
+    <a href="{% url 'admin:loans_loanrequest_changelist' %}?status=UNDER_REVIEW"
+       style="font-size:12px;color:#17a2b8;font-weight:600">
+      View all under review &rarr;
+    </a>
+  </div>
+  {% else %}
+  <p style="color:#aaa;font-style:italic">No requests awaiting action. &#10004;</p>
+  {% endif %}
+</div>
+
+<!-- ============================================================
+     Defaulted Loans
+     ============================================================ -->
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;
+            padding:22px;margin-bottom:28px">
+  <h3 style="margin-top:0;font-size:15px;color:#dc3545">
+    &#9888; Defaulted Loans
+  </h3>
+  {% if defaulted_data %}
+  <table style="width:100%;border-collapse:collapse">
+    <thead>
+      <tr style="background:#fff3f3">
+        <th style="padding:9px 10px;text-align:left;font-size:12px;color:#555;
+                   border-bottom:2px solid #f5c6cb">Customer</th>
+        <th style="padding:9px 10px;text-align:right;font-size:12px;color:#555;
+                   border-bottom:2px solid #f5c6cb">Principal</th>
+        <th style="padding:9px 10px;text-align:right;font-size:12px;color:#555;
+                   border-bottom:2px solid #f5c6cb">Paid</th>
+        <th style="padding:9px 10px;text-align:right;font-size:12px;color:#555;
+                   border-bottom:2px solid #f5c6cb">Remaining</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in defaulted_data %}
+      <tr style="border-bottom:1px solid #f9f0f0">
+        <td style="padding:9px 10px">
+          <a href="{{ l.change_url }}"
+             style="font-weight:600;color:#dc3545;text-decoration:none">
+            {{ l.customer }}
+          </a>
+          <br>
+          <span style="font-size:11px;color:#aaa;font-family:monospace">
+            {{ l.phone }}
+          </span>
+        </td>
+        <td style="padding:9px 10px;text-align:right;font-family:monospace;font-weight:700">
+          {{ l.principal }}
+        </td>
+        <td style="padding:9px 10px;text-align:right;font-family:monospace;
+                   color:#28a745;font-weight:700">
+          {{ l.paid }}
+        </td>
+        <td style="padding:9px 10px;text-align:right;font-family:monospace;
+                   color:#dc3545;font-weight:700">
+          {{ l.remaining }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div style="margin-top:12px">
+    <a href="{% url 'admin:loans_loan_changelist' %}?status=DEFAULTED"
+       style="font-size:12px;color:#dc3545;font-weight:600">
+      View all defaulted &rarr;
+    </a>
+  </div>
+  {% else %}
+  <p style="color:#aaa;font-style:italic">No defaulted loans. &#10004;</p>
+  {% endif %}
+</div>
+
+<!-- ============================================================
+     Quick Actions
+     ============================================================ -->
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:22px">
+  <h3 style="margin-top:0;font-size:15px;color:#333">Quick Filters</h3>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <a href="{% url 'admin:loans_loanrequest_changelist' %}"
+       style="padding:8px 16px;background:#417690;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#8592; All Requests
+    </a>
+    <a href="{% url 'admin:loans_loan_changelist' %}"
+       style="padding:8px 16px;background:#28a745;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      All Loans
+    </a>
+    <a href="{% url 'admin:loans_loanrequest_changelist' %}?status=UNDER_REVIEW"
+       style="padding:8px 16px;background:#17a2b8;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#128269; Under Review
+    </a>
+    <a href="{% url 'admin:loans_loan_changelist' %}?status=DEFAULTED"
+       style="padding:8px 16px;background:#dc3545;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      &#9888; Defaulted
+    </a>
+    <a href="{% url 'admin:loans_loan_changelist' %}?status=ACTIVE"
+       style="padding:8px 16px;background:#6c757d;color:#fff;border-radius:6px;
+              text-decoration:none;font-size:13px;font-weight:600">
+      Active Loans
+    </a>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Reject Loan Request{% endblock %}
+
+{% block content %}
+<h1>&#10008; Reject Loan Request</h1>
+
+<!-- Request summary -->
+<div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;
+            padding:20px;max-width:600px;margin-bottom:24px">
+  <h3 style="margin-top:0;font-size:14px;color:#6d4c00">Request Summary</h3>
+  <table style="width:100%;border-collapse:collapse">
+    <tr style="border-bottom:1px solid #ffe082">
+      <td style="padding:7px 4px;font-weight:600;color:#555;width:160px">Customer</td>
+      <td style="padding:7px 4px">{{ req.customer.fullname }} ({{ req.customer.phone }})</td>
+    </tr>
+    <tr style="border-bottom:1px solid #ffe082">
+      <td style="padding:7px 4px;font-weight:600;color:#555">Loan Type</td>
+      <td style="padding:7px 4px">{{ req.loan_type }}</td>
+    </tr>
+    <tr style="border-bottom:1px solid #ffe082">
+      <td style="padding:7px 4px;font-weight:600;color:#555">Amount</td>
+      <td style="padding:7px 4px;font-family:monospace;font-weight:700">{{ req.amount }}</td>
+    </tr>
+    <tr style="border-bottom:1px solid #ffe082">
+      <td style="padding:7px 4px;font-weight:600;color:#555">Duration</td>
+      <td style="padding:7px 4px">{{ req.duration_months }} months</td>
+    </tr>
+    <tr style="border-bottom:1px solid #ffe082">
+      <td style="padding:7px 4px;font-weight:600;color:#555">Risk Score</td>
+      <td style="padding:7px 4px;font-weight:700;
+                 color:{% if req.risk_score >= 60 %}#dc3545{% elif req.risk_score >= 30 %}#fd7e14{% else %}#28a745{% endif %}">
+        {{ req.risk_score }}
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:7px 4px;font-weight:600;color:#555">Current Status</td>
+      <td style="padding:7px 4px">{{ req.status }}</td>
+    </tr>
+  </table>
+</div>
+
+<!-- Rejection form -->
+<div style="background:#fff;border:1px solid #ddd;border-radius:6px;
+            padding:24px;max-width:600px;margin-bottom:24px">
+  <h3 style="margin-top:0;font-size:15px;color:#dc3545">Rejection Reason</h3>
+
+  <form method="post">
+    {% csrf_token %}
+    <div style="margin-bottom:18px">
+      <label style="display:block;font-size:13px;font-weight:600;
+                    color:#555;margin-bottom:6px">
+        Reason <span style="color:#dc3545">*</span>
+      </label>
+      <textarea
+        name="reason"
+        rows="4"
+        required
+        placeholder="Explain why this loan request is being rejected. This message will be sent to the customer."
+        style="width:100%;padding:9px 12px;border:1px solid #ccc;
+               border-radius:4px;font-size:14px;
+               box-sizing:border-box;resize:vertical"
+      ></textarea>
+    </div>
+
+    <div style="display:flex;gap:12px">
+      <button
+        type="submit"
+        style="padding:9px 24px;background:#dc3545;color:#fff;border:none;
+               border-radius:4px;font-size:14px;font-weight:600;cursor:pointer"
+        onclick="return confirm('Confirm rejection? The customer will be notified.')"
+      >
+        &#10008; Confirm Rejection
+      </button>
+      <a href="{{ back_url }}"
+         style="padding:9px 20px;background:#eee;color:#333;border-radius:4px;
+                text-decoration:none;font-size:14px;font-weight:600">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}
