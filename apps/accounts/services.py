@@ -210,3 +210,64 @@ class AccountService:
 
         account.save(update_fields=["loan_blocked_balance"])
 
+    @staticmethod
+    @transaction.atomic
+    def set_primary(user, account_id, actor=None):
+
+        new_primary = Account.objects.select_for_update().get(
+            id=account_id, customer=user
+        )
+
+        if new_primary.status != AccountStatus.ACTIVE:
+            raise ValidationError("Only an active account can be set as primary.")
+
+        # primary قبلی رو پاک کن
+        Account.objects.filter(
+            customer=user, is_primary=True
+        ).exclude(id=account_id).update(is_primary=False)
+
+        new_primary.is_primary = True
+        new_primary.save(update_fields=["is_primary"])
+
+        AuditLogService.info(
+            actor=actor or user,
+            action="PRIMARY_ACCOUNT_CHANGED",
+            target_type="Account",
+            target_id=str(account_id),
+        )
+        return new_primary
+
+    @staticmethod
+    def get_customer_accounts(customer_id):
+        return Account.objects.filter(
+            customer_id=customer_id
+        ).select_related("bank", "customer")
+
+    @staticmethod
+    @transaction.atomic
+    def withdraw(account_id, amount, actor=None):
+        """برداشت نقدی توسط staff"""
+        account = Account.objects.select_for_update().get(id=account_id)
+
+        amount = Decimal(amount)
+
+        if amount <= 0:
+            raise ValidationError("Invalid amount")
+
+        if account.status != AccountStatus.ACTIVE:
+            raise ValidationError("Account is not active")
+
+        if account.available_balance < amount:
+            raise ValidationError("Insufficient balance")
+
+        account.balance -= amount
+        account.save(update_fields=["balance"])
+
+        AuditLogService.info(
+            actor=actor,
+            action="CASH_WITHDRAW",
+            target_type="Account",
+            target_id=str(account_id),
+            metadata={"amount": str(amount)},
+        )
+        return account
