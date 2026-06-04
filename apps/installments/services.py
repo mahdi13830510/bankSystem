@@ -83,3 +83,24 @@ class InstallmentService:
         paid = loan.paid_amount
 
         return total - paid
+
+    @staticmethod
+    def apply_manual_penalty(installment, amount, actor=None):
+        if installment.status == InstallmentStatus.PAID:
+            raise Exception("Cannot apply penalty to a paid installment.")
+
+        installment.penalty_amount += Decimal(str(amount))
+        if installment.status != InstallmentStatus.OVERDUE:
+            installment.status = InstallmentStatus.OVERDUE
+        installment.save(update_fields=["penalty_amount", "status"])
+
+        AuditLogService.log(
+            actor=actor,
+            action="MANUAL_PENALTY_APPLIED",
+            metadata={
+                "installment_id": str(installment.id),
+                "penalty_amount": str(amount),
+            }
+        )
+
+        return installment
