@@ -1,6 +1,7 @@
 from uuid import uuid4
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.db import transaction as db_transaction
 
 from apps.auditlogs.services import AuditLogService
@@ -14,6 +15,7 @@ from .models import (
     TransactionType,
     TransactionStatus,
 )
+from ..accounts.models import Account
 
 
 class TransactionService:
@@ -28,13 +30,13 @@ class TransactionService:
     @staticmethod
     @db_transaction.atomic
     def card_transfer(
-        *,
-        actor,
-        source,
-        destination,
-        amount,
-        ip,
-        description=""
+            *,
+            actor,
+            source,
+            destination,
+            amount,
+            ip,
+            description=""
     ):
 
         amount = Decimal(str(amount))
@@ -105,12 +107,12 @@ class TransactionService:
     @staticmethod
     @db_transaction.atomic
     def iban_transfer(
-        *,
-        actor,
-        source,
-        destination,
-        amount,
-        ip
+            *,
+            actor,
+            source,
+            destination,
+            amount,
+            ip
     ):
 
         amount = Decimal(str(amount))
@@ -210,3 +212,41 @@ class TransactionService:
             reference_number=TransactionService.generate_reference(),
             description=f"Loan penalty #{loan.id}"
         )
+
+    @staticmethod
+    @db_transaction.atomic
+    def reverse_transaction(transaction, actor):
+
+        if transaction.status != TransactionStatus.SUCCESS:
+            raise ValidationError("Only SUCCESS transactions can be reversed.")
+
+        account = transaction.account
+        refund_total = transaction.amount + transaction.fee
+
+        account = Account.objects.select_for_update().get(id=account.id)
+        account.balance += refund_total
+        account.save(update_fields=["balance"])
+
+        transaction.status = TransactionStatus.REVERSED
+        transaction.save(update_fields=["status"])
+
+        refund_txn = Transaction.objects.create(
+            account=account,
+            amount=refund_total,
+            fee=Decimal("0"),
+            type=TransactionType.REFUND,
+            status=TransactionStatus.SUCCESS,
+            reference_number=TransactionService.generate_reference(),
+            description=f"Reversal of {transaction.reference_number}",
+        )
+
+        AuditLogService.warning(
+            actor=actor,
+            action="TRANSACTION_REVERSED",
+            metadata={
+                "original_txn": str(transaction.id),
+                "refund_txn": str(refund_txn.id),
+            }
+        )
+
+        return refund_txn
