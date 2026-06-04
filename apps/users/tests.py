@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from rest_framework import status
 
 from rest_framework.test import APIClient
 
@@ -245,8 +246,10 @@ class RegisterApiTests(TestCase):
         }
 
         res = self.client.post(self.url, payload, format="json")
-
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(
+            res.status_code,
+            status.HTTP_201_CREATED
+        )
         self.assertEqual(res.data["message"], "registered")
         self.assertIn("user_id", res.data)
         self.assertIsNotNone(res.data["user_id"])
