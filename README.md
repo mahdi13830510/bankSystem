@@ -121,124 +121,124 @@ Full interactive docs available at `/swagger/` (drf-yasg).
 
 #Notifications app APIs
 
-| Method | Path | Permission | Description | 
+| Method | Path | Permission |
 |---|---|---|
-| Get | `/notifications/my/` | Customer | |
-| Get | `/notifications/unread-count/` | Customer | |
-| POST | `/notifications/mark-all-read/` | Customer | |
-| POST | `/notifications/<pk>/read/` | Customer | |
-| GET | `/notifications/admin/` | Admin | |
-| POST | `/notifications/admin/send` | Admin | |
-| POST | `/notifications/admin/broadcast/` | Admin | |
-| GET | `/notifications/admin/users/<user_id>/` | Admin | |
-| DELETE | `/notifications/admin/<pk>/delete/` | Admin | |
+| Get | `/notifications/my/` | Customer | 
+| Get | `/notifications/unread-count/` | Customer | 
+| POST | `/notifications/mark-all-read/` | Customer | 
+| POST | `/notifications/<pk>/read/` | Customer | 
+| GET | `/notifications/admin/` | Admin | 
+| POST | `/notifications/admin/send` | Admin | 
+| POST | `/notifications/admin/broadcast/` | Admin | 
+| GET | `/notifications/admin/users/<user_id>/` | Admin | 
+| DELETE | `/notifications/admin/<pk>/delete/` | Admin | 
 
 #Transactions App APIs
 
-| Method | Path | Permission | Description | 
+| Method | Path | Permission |
 |---|---|---|
-| POST | `/api/transactions/card-transfer/` | Customer | |
-| POST | `/api/transactions/iban-transfer/` | Customer | |
-| GET | `/api/transactions/statement/<account_id>/` | Customer | |
-| GET | `/api/transactions/limits/<account_id>/usage/` | Customer | |
-| GET | `/api/transactions/admin/` | Admin | |
-| GET | `/api/transactions/admin/<pk>/` | Admin | |
-| GET | `/api/transactions/admin/ref/<reference>/` | Admin | |
-| GET | `/api/transactions/admin/account/<id>/statement/` | Admin | |
-| POST | `/api/transactions/admin/<pk>/reverse/` | Admin | |
-| POST | `/api/transactions/admin/account/<id>/limits/reset/` | Admin | |
-| GET | `/api/transactions/admin/account/<id>/limits/usage/` | Admin | |
+| POST | `/api/transactions/card-transfer/` | Customer | 
+| POST | `/api/transactions/iban-transfer/` | Customer | 
+| GET | `/api/transactions/statement/<account_id>/` | Customer | 
+| GET | `/api/transactions/limits/<account_id>/usage/` | Customer | 
+| GET | `/api/transactions/admin/` | Admin | 
+| GET | `/api/transactions/admin/<pk>/` | Admin | 
+| GET | `/api/transactions/admin/ref/<reference>/` | Admin | 
+| GET | `/api/transactions/admin/account/<id>/statement/` | Admin | 
+| POST | `/api/transactions/admin/<pk>/reverse/` | Admin | 
+| POST | `/api/transactions/admin/account/<id>/limits/reset/` | Admin | 
+| GET | `/api/transactions/admin/account/<id>/limits/usage/` | Admin | 
 
 
 #Loans App APIs 
 
-| Method | Path | Permission | Description | 
+| Method | Path | Permission |  
 |---|---|---|
-| GET | `/loans/my-requests/<pk>/` | Customer | |
-| GET | `/loans/my-loans/<pk>/` | Customer | |
-| GET | `/loans/admin/requests/` | Admin | |
-| GET | `/loans/admin/requests/pending/` | Admin | |
-| GET | `/loans/admin/requests/pending/` | Admin | |
-| GET | `/loans/admin/requests/<pk>/` | Admin | |
-| POST | `/loans/admin/requests/<pk>/evaluate/` | Admin | |
-| POST | `/loans/admin/requests/<pk>/approve/` | Admin | |
-| POST | `/loans/admin/requests/<pk>/reject/` | Admin | |
-| GET | `/loans/admin/loans/` | Admin | |
-| GET | `/loans/admin/loans/<pk>/` | Admin | |
-| POST | `/loans/admin/loans/<pk>/status/` | Admin | |
-| GET | `/loans/admin/customer/<id>/loans/` | Admin | |
-| POST | `/loans/admin/customer/<id>/requests/` | Admin | |
+| GET | `/loans/my-requests/<pk>/` | Customer | 
+| GET | `/loans/my-loans/<pk>/` | Customer | 
+| GET | `/loans/admin/requests/` | Admin | 
+| GET | `/loans/admin/requests/pending/` | Admin | 
+| GET | `/loans/admin/requests/pending/` | Admin | 
+| GET | `/loans/admin/requests/<pk>/` | Admin | 
+| POST | `/loans/admin/requests/<pk>/evaluate/` | Admin | 
+| POST | `/loans/admin/requests/<pk>/approve/` | Admin | 
+| POST | `/loans/admin/requests/<pk>/reject/` | Admin | 
+| GET | `/loans/admin/loans/` | Admin | 
+| GET | `/loans/admin/loans/<pk>/` | Admin | 
+| POST | `/loans/admin/loans/<pk>/status/` | Admin | 
+| GET | `/loans/admin/customer/<id>/loans/` | Admin | 
+| POST | `/loans/admin/customer/<id>/requests/` | Admin | 
 
 #Installments App APIs 
 
-| Method | Path | Permission | Description | 
+| Method | Path | Permission | 
 |---|---|---|
-| GET | `/installments/my/<pk>/` | Customer | |
-| GET | `/installments/my/loan/<loan_id>/` | Customer | |
-| POST | `/installments/<pk>/pay/` | Customer | |
-| GET | `/installments/admin/` | Admin | |
-| GET | `/installments/admin/overdue/` | Admin | |
-| GET | `/installments/admin/<pk>/` | Admin | |
-| POST | `/installments/admin/<pk>/penalty/` | Admin | |
-| GET | `/installments/admin/loan/<loan_id>/` | Admin | |
-| GET | `/installments/admin/loan/<loan_id>/remaining/` | Admin | |
+| GET | `/installments/my/<pk>/` | Customer | 
+| GET | `/installments/my/loan/<loan_id>/` | Customer | 
+| POST | `/installments/<pk>/pay/` | Customer | 
+| GET | `/installments/admin/` | Admin | 
+| GET | `/installments/admin/overdue/` | Admin | 
+| GET | `/installments/admin/<pk>/` | Admin | 
+| POST | `/installments/admin/<pk>/penalty/` | Admin | 
+| GET | `/installments/admin/loan/<loan_id>/` | Admin | 
+| GET | `/installments/admin/loan/<loan_id>/remaining/` | Admin | 
 
 #Users App APIs 
 
-| Method | Path | Permission | Description | 
+| Method | Path | Permission | 
 |---|---|---|
-| POST | `/api/v1/users/register` | Public | |
-| GET | `/api/v1/users/me/` | Customer | |
-| POST | `/api/v1/users/me/change-password/` | Customer | |
-| GET/PATCH | `/api/v1/users/me/profile/` | Customer | |
-| GET | `/api/v1/users/me/devices/` | Customer | |
-| DELETE | `/api/v1/users/me/devices/<pk>/` | Customer | |
-| GET | `/api/v1/users/admin/` | Admin | |
-| GET/PATCH | `/api/v1/users/admin/<pk>/` | Admin | |
-| POST | `/api/v1/users/admin/<pk>/verify/` | Admin | |
-| POST | `/api/v1/users/admin/<pk>/block/` | Admin | |
-| POST | `/api/v1/users/admin/<pk>/unblock/` | Admin | |
-| POST | `/api/v1/users/admin/<pk>/suspend/` | Admin | |
-| POST | `/api/v1/users/admin/<pk>/activate/` | Admin | |
-| POST | `/api/v1/users/admin/<pk>/change-role/` | Admin | |
-| POST | `/api/v1/users/admin/<pk>/reset-attempts/` | Admin | |
-| POST | `/api/v1/users/admin/<pk>/reset-password/` | Admin | |
-| GET/PATCH | `/api/v1/users/admin/<pk>/profile/` | Admin | |
-| GET | `/api/v1/users/admin/<pk>/devices/` | Admin | |
-| DELETE | `/api/v1/users/admin/<pk>/devices/<device_pk>/` | Admin | |
+| POST | `/api/v1/users/register` | Public | 
+| GET | `/api/v1/users/me/` | Customer | 
+| POST | `/api/v1/users/me/change-password/` | Customer | 
+| GET/PATCH | `/api/v1/users/me/profile/` | Customer | 
+| GET | `/api/v1/users/me/devices/` | Customer | 
+| DELETE | `/api/v1/users/me/devices/<pk>/` | Customer | 
+| GET | `/api/v1/users/admin/` | Admin | 
+| GET/PATCH | `/api/v1/users/admin/<pk>/` | Admin | 
+| POST | `/api/v1/users/admin/<pk>/verify/` | Admin | 
+| POST | `/api/v1/users/admin/<pk>/block/` | Admin | 
+| POST | `/api/v1/users/admin/<pk>/unblock/` | Admin | 
+| POST | `/api/v1/users/admin/<pk>/suspend/` | Admin | 
+| POST | `/api/v1/users/admin/<pk>/activate/` | Admin | 
+| POST | `/api/v1/users/admin/<pk>/change-role/` | Admin | 
+| POST | `/api/v1/users/admin/<pk>/reset-attempts/` | Admin | 
+| POST | `/api/v1/users/admin/<pk>/reset-password/` | Admin | 
+| GET/PATCH | `/api/v1/users/admin/<pk>/profile/` | Admin | 
+| GET | `/api/v1/users/admin/<pk>/devices/` | Admin | 
+| DELETE | `/api/v1/users/admin/<pk>/devices/<device_pk>/` | Admin | 
 
 #Authentication app APIs 
 
-| Method | Path | Permission | Description | 
+| Method | Path | Permission |
 |---|---|---|
-| POST | `/api/v1/auth/refresh/` | Public | |
-| GET | `/api/v1/auth/sessions/my/` | Customer | |
-| POST | `/api/v1/auth/sessions/my/<pk>/revoke/` | Customer | |
-| POST | `/api/v1/auth/sessions/revoke-others/` | Customer | |
-| GET | `/api/v1/auth/admin/sessions/` | Admin | |
-| GET | `/api/v1/auth/admin/sessions/<pk>/` | Admin | |
-| POST | `/api/v1/auth/admin/sessions/<pk>/revoke/` | Admin | |
-| GET | `/api/v1/auth/admin/users/<id>/sessions/` | Admin | |
-| POST | `/api/v1/auth/admin/users/<id>/sessions/revoke-all/` | Admin | |
-| GET | `/api/v1/auth/admin/users/<id>/otps/` | Admin | |
-| POST | `/api/v1/auth/admin/users/<id>/otps/invalidate/` | Admin | |
+| POST | `/api/v1/auth/refresh/` | Public | 
+| GET | `/api/v1/auth/sessions/my/` | Customer | 
+| POST | `/api/v1/auth/sessions/my/<pk>/revoke/` | Customer | 
+| POST | `/api/v1/auth/sessions/revoke-others/` | Customer | 
+| GET | `/api/v1/auth/admin/sessions/` | Admin | 
+| GET | `/api/v1/auth/admin/sessions/<pk>/` | Admin | 
+| POST | `/api/v1/auth/admin/sessions/<pk>/revoke/` | Admin | 
+| GET | `/api/v1/auth/admin/users/<id>/sessions/` | Admin | 
+| POST | `/api/v1/auth/admin/users/<id>/sessions/revoke-all/` | Admin | 
+| GET | `/api/v1/auth/admin/users/<id>/otps/` | Admin | 
+| POST | `/api/v1/auth/admin/users/<id>/otps/invalidate/` | Admin | 
 
 #Accounts App APIs 
 
-| Method | Path | Permission | Description | 
+| Method | Path | Permission | 
 |---|---|---|
-| POST | `/accounts/<pk>/set-primary/` | Customer | |
-| POST | `/accounts/<pk>/withdraw/` | Staff | |
-| GET | `/accounts/admin/` | Staff | |
-| GET | `/accounts/admin/stats/` | Admin | |
-| POST | `/accounts/admin/open/` | Admin | |
-| GET | `/accounts/admin/<pk>/` | Staff | |
-| POST | `/accounts/admin/<pk>/set-primary/` | Admin | |
-| GET | `/accounts/admin/number/<account_number>/` | Staff | |
-| GET | `/accounts/admin/iban/<iban>/` | Staff | |
-| GET | `/accounts/admin/customer/<id>/` | Staff | |
-| POST | `/accounts/admin/<pk>/block-balance/` | Admin | |
-| POST | `/accounts/admin/<pk>/unblock-balance/` | Admin | |
+| POST | `/accounts/<pk>/set-primary/` | Customer | 
+| POST | `/accounts/<pk>/withdraw/` | Staff | 
+| GET | `/accounts/admin/` | Staff | 
+| GET | `/accounts/admin/stats/` | Admin | 
+| POST | `/accounts/admin/open/` | Admin | 
+| GET | `/accounts/admin/<pk>/` | Staff | 
+| POST | `/accounts/admin/<pk>/set-primary/` | Admin | 
+| GET | `/accounts/admin/number/<account_number>/` | Staff | 
+| GET | `/accounts/admin/iban/<iban>/` | Staff | 
+| GET | `/accounts/admin/customer/<id>/` | Staff | 
+| POST | `/accounts/admin/<pk>/block-balance/` | Admin | 
+| POST | `/accounts/admin/<pk>/unblock-balance/` | Admin | 
 
 
 ## Environment variables
