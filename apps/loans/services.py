@@ -121,3 +121,20 @@ class LoanService:
             action="LOAN_REJECTED",
             metadata={"loan_request_id": str(req.id)}
         )
+
+    @staticmethod
+    def change_status(manager, loan, new_status, note=""):
+        loan.status = new_status
+        loan.save(update_fields=["status"])
+
+        AuditLogService.log(
+            actor=manager,
+            action="LOAN_STATUS_CHANGED",
+            metadata={
+                "loan_id": str(loan.id),
+                "new_status": new_status,
+                "note": note,
+            }
+        )
+
+        return loan

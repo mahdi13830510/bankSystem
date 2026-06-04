@@ -116,7 +116,9 @@ class LoanAPITest(APITestCase):
             "existing_debt": "1000.00"
         }
         response = self.client.post(url, data,format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED)
         self.assertTrue("id" in response.data)
         self.assertEqual(LoanRequest.objects.count(), 1)
 
@@ -137,16 +139,30 @@ class LoanAPITest(APITestCase):
             monthly_income=2000, loan_type="PERSONAL"
         )
 
-        url = f"/loans/{req.id}/approve/"
+        url = f"/loans/admin/requests/{req.id}/approve/"
 
         response = self.client.post(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         self.client.force_authenticate(user=self.admin)
 
+        from decimal import Decimal
+
         with patch('apps.loans.services.LoanService.approve_request') as mock_approve:
-            mock_approve.return_value = MagicMock(id="some-uuid")
+            loan = Loan.objects.create(
+                customer=self.user,
+                loan_request=req,
+                principal_amount=Decimal("5000.00"),
+                interest_rate=Decimal("10.00"),
+                total_payable=Decimal("5500.00"),
+                monthly_installment=Decimal("458.33"),
+                duration_months=12,
+            )
+
+            mock_approve.return_value = loan
+
             response = self.client.post(url)
+
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_reject_loan_api(self):
@@ -155,7 +171,7 @@ class LoanAPITest(APITestCase):
             monthly_income=2000, loan_type="PERSONAL"
         )
         self.client.force_authenticate(user=self.admin)
-        url = f"/loans/{req.id}/reject/"
+        url = f"/loans/admin/requests/{req.id}/reject/"
 
         with patch('apps.loans.services.LoanService.reject_request'):
             response = self.client.post(url, {"reason": "Low income balance"})
