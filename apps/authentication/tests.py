@@ -94,6 +94,8 @@ class AuthenticationViewTests(TestCase):
             expires_at="2099-01-01T00:00:00Z"
         )
 
+        self.client.force_authenticate(user=self.user)
+
         response = self.client.post(
             "/api/v1/auth/logout/",
             {
@@ -105,7 +107,6 @@ class AuthenticationViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(session.status, "revoked")
-
 
 # services tests
 
