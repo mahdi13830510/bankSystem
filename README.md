@@ -119,6 +119,23 @@ Base path: `/api/v1/`
 
 Full interactive docs available at `/swagger/` (drf-yasg).
 
+#Ai_agent App APIs 
+
+| Method | Path | Permission |
+|---|---|---|
+| Get | `/api/ai/conversations/` | Customer | 
+| Get/DELETE | `/api/ai/conversations/<pk>/` | Customer | 
+| Get | `/api/ai/conversations/<pk>/messages/` | Customer | 
+| Get | `/api/ai/actions/pending/` | Customer | 
+| POST | `/api/ai/actions/<pk>/cancel/` | Customer | 
+| Get | `/api/ai/admin/conversations/` | Admin | 
+| Get/DELETE | `/api/ai/admin/conversations/<pk>/` | Admin | 
+| Get | `/api/ai/admin/users/<id>/conversations/` | Admin | 
+| Get | `/api/ai/admin/actions/` | Admin | 
+| Get | `/api/ai/admin/actions/<pk>/` | Admin | 
+| POST | `/api/ai/admin/actions/<pk>/cancel/` | Admin | 
+| Get | `/api/ai/admin/stats/` | Admin | 
+
 #Notifications app APIs
 
 | Method | Path | Permission |
