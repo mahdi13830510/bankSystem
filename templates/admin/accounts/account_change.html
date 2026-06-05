@@ -1,0 +1,70 @@
+{% extends "admin/change_form.html" %}
+
+{% block object-tools-items %}
+  {{ block.super }}
+
+  {% if freeze_url %}
+  <li>
+    <a href="{{ freeze_url }}"
+       onclick="return confirm('Freeze this account? Customer will not be able to transact.')"
+       style="background:#dc3545;color:#fff;padding:6px 14px;border-radius:4px;
+              text-decoration:none;font-size:13px;font-weight:600;display:inline-block">
+      🔒 Freeze
+    </a>
+  </li>
+  {% endif %}
+
+  {% if activate_url %}
+  <li>
+    <a href="{{ activate_url }}"
+       onclick="return confirm('Activate this account?')"
+       style="background:#28a745;color:#fff;padding:6px 14px;border-radius:4px;
+              text-decoration:none;font-size:13px;font-weight:600;display:inline-block">
+      ✔ Activate
+    </a>
+  </li>
+  {% endif %}
+
+  {% if deposit_url %}
+  <li>
+    <a href="{{ deposit_url }}"
+       style="background:#28a745;color:#fff;padding:6px 14px;border-radius:4px;
+              text-decoration:none;font-size:13px;font-weight:600;display:inline-block">
+      ＋ Deposit
+    </a>
+  </li>
+  {% endif %}
+
+  {% if withdraw_url %}
+  <li>
+    <a href="{{ withdraw_url }}"
+       style="background:#fd7e14;color:#fff;padding:6px 14px;border-radius:4px;
+              text-decoration:none;font-size:13px;font-weight:600;display:inline-block">
+      － Withdraw
+    </a>
+  </li>
+  {% endif %}
+
+  {% if set_primary_url %}
+  <li>
+    <a href="{{ set_primary_url }}"
+       onclick="return confirm('Set this as the primary account for this customer?')"
+       style="background:#417690;color:#fff;padding:6px 14px;border-radius:4px;
+              text-decoration:none;font-size:13px;font-weight:600;display:inline-block">
+      ★ Set Primary
+    </a>
+  </li>
+  {% endif %}
+
+  {% if close_url %}
+  <li>
+    <a href="{{ close_url }}"
+       onclick="return confirm('Close this account? Balance must be zero. This cannot be undone.')"
+       style="background:#6c757d;color:#fff;padding:6px 14px;border-radius:4px;
+              text-decoration:none;font-size:13px;font-weight:600;display:inline-block">
+      ✕ Close
+    </a>
+  </li>
+  {% endif %}
+
+{% endblock %}
