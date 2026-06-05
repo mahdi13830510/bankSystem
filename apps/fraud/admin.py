@@ -24,19 +24,22 @@ DECISION_COLORS = {
     "BLOCKED": "#dc3545",
 }
 
-
 # ---------------------------------------------------------------------------
 # Inline score badge helper
 # ---------------------------------------------------------------------------
-
 def _score_bar(score):
+    if score is None:
+        score = 0
+
     if score >= 80:
         color = "#dc3545"
     elif score >= 50:
         color = "#fd7e14"
     else:
         color = "#28a745"
+
     pct = min(score, 100)
+
     return format_html(
         '<div style="display:flex;align-items:center;gap:8px">'
         '<div style="background:#eee;border-radius:4px;width:80px;height:10px;overflow:hidden">'
@@ -193,9 +196,9 @@ class FraudReportAdmin(admin.ModelAdmin):
         avg_score = qs.aggregate(a=Avg("score"))["a"] or 0
         extra_context["summary_cards"] = [
             {"label": "Total Reports", "value": total, "color": "#333"},
-            {"label": "Blocked",       "value": blocked,    "color": "#dc3545"},
-            {"label": "Suspicious",    "value": suspicious, "color": "#fd7e14"},
-            {"label": "Avg Score",     "value": f"{avg_score:.1f}", "color": "#417690"},
+            {"label": "Blocked", "value": blocked, "color": "#dc3545"},
+            {"label": "Suspicious", "value": suspicious, "color": "#fd7e14"},
+            {"label": "Avg Score", "value": f"{avg_score:.1f}", "color": "#417690"},
         ]
         extra_context["model_dashboard_url"] = reverse("admin:fraud_model_dashboard")
         return super().changelist_view(request, extra_context=extra_context)
@@ -209,19 +212,19 @@ class FraudReportAdmin(admin.ModelAdmin):
             m = artifact["model"]
             sc = artifact["scaler"]
             model_params = {
-                "Algorithm":        "IsolationForest",
-                "n_estimators":     m.n_estimators,
-                "contamination":    m.contamination,
-                "n_features":       m.n_features_in_,
+                "Algorithm": "IsolationForest",
+                "n_estimators": m.n_estimators,
+                "contamination": m.contamination,
+                "n_features": m.n_features_in_,
                 "score_low (safe)": f"{artifact['score_low']:.6f}",
                 "score_high (fraud)": f"{artifact['score_high']:.6f}",
-                "artifact_path":    ARTIFACT_PATH,
+                "artifact_path": ARTIFACT_PATH,
             }
             for name, mean, std in zip(FEATURE_NAMES, sc.mean_, sc.scale_):
                 scaler_stats.append({
                     "name": name,
                     "mean": f"{mean:.4f}",
-                    "std":  f"{std:.4f}",
+                    "std": f"{std:.4f}",
                 })
 
         # -- score distribution --
@@ -235,33 +238,36 @@ class FraudReportAdmin(admin.ModelAdmin):
         for i, count in enumerate(buckets_raw):
             lo, hi = i * 10, i * 10 + 9
             score_buckets.append({
-                "label":  f"{lo}-{hi}",
-                "count":  count,
+                "label": f"{lo}-{hi}",
+                "count": count,
                 "height": max(int(count / max_count * 110), 2),
-                "color":  "#dc3545" if lo >= 80 else "#fd7e14" if lo >= 50 else "#28a745",
+                "color": "#dc3545" if lo >= 80 else "#fd7e14" if lo >= 50 else "#28a745",
             })
 
         # -- summary cards --
         qs = FraudReport.objects.all()
         avg = qs.aggregate(a=Avg("score"))["a"] or 0
         cards = [
-            {"label": "Total Reports", "value": qs.count(),                                         "color": "#333",     "sub": ""},
-            {"label": "Blocked",       "value": qs.filter(decision="BLOCKED").count(),               "color": "#dc3545",  "sub": "score >= 80"},
-            {"label": "Suspicious",    "value": qs.filter(decision="SUSPICIOUS").count(),            "color": "#fd7e14",  "sub": "score 50-79"},
-            {"label": "Safe",          "value": qs.filter(decision="SAFE").count(),                  "color": "#28a745",  "sub": "score < 50"},
-            {"label": "Avg Score",     "value": f"{avg:.1f}",                                        "color": "#417690",  "sub": "last all time"},
-            {"label": "Model File",    "value": "Loaded" if os.path.exists(ARTIFACT_PATH) else "Missing", "color": "#28a745" if os.path.exists(ARTIFACT_PATH) else "#dc3545", "sub": ""},
+            {"label": "Total Reports", "value": qs.count(), "color": "#333", "sub": ""},
+            {"label": "Blocked", "value": qs.filter(decision="BLOCKED").count(), "color": "#dc3545",
+             "sub": "score >= 80"},
+            {"label": "Suspicious", "value": qs.filter(decision="SUSPICIOUS").count(), "color": "#fd7e14",
+             "sub": "score 50-79"},
+            {"label": "Safe", "value": qs.filter(decision="SAFE").count(), "color": "#28a745", "sub": "score < 50"},
+            {"label": "Avg Score", "value": f"{avg:.1f}", "color": "#417690", "sub": "last all time"},
+            {"label": "Model File", "value": "Loaded" if os.path.exists(ARTIFACT_PATH) else "Missing",
+             "color": "#28a745" if os.path.exists(ARTIFACT_PATH) else "#dc3545", "sub": ""},
         ]
 
         # -- test form fields --
         test_fields = [
-            {"name": "amount",            "label": "Amount",          "type": "number", "default": "500",  "step": "0.01"},
-            {"name": "hour_of_day",       "label": "Hour (0-23)",     "type": "number", "default": "14",   "step": "1"},
-            {"name": "is_weekend",        "label": "Weekend (0/1)",   "type": "number", "default": "0",    "step": "1"},
-            {"name": "is_interbank",      "label": "Interbank (0/1)", "type": "number", "default": "0",    "step": "1"},
-            {"name": "history_count",     "label": "History Count",   "type": "number", "default": "10",   "step": "1"},
-            {"name": "fee_ratio",         "label": "Fee Ratio",       "type": "number", "default": "0.01", "step": "0.001"},
-            {"name": "txn_type_encoded",  "label": "Txn Type (0-9)",  "type": "number", "default": "0",    "step": "1"},
+            {"name": "amount", "label": "Amount", "type": "number", "default": "500", "step": "0.01"},
+            {"name": "hour_of_day", "label": "Hour (0-23)", "type": "number", "default": "14", "step": "1"},
+            {"name": "is_weekend", "label": "Weekend (0/1)", "type": "number", "default": "0", "step": "1"},
+            {"name": "is_interbank", "label": "Interbank (0/1)", "type": "number", "default": "0", "step": "1"},
+            {"name": "history_count", "label": "History Count", "type": "number", "default": "10", "step": "1"},
+            {"name": "fee_ratio", "label": "Fee Ratio", "type": "number", "default": "0.01", "step": "0.001"},
+            {"name": "txn_type_encoded", "label": "Txn Type (0-9)", "type": "number", "default": "0", "step": "1"},
         ]
 
         # -- test result from query param --
@@ -283,12 +289,12 @@ class FraudReportAdmin(admin.ModelAdmin):
         if request.method == "POST":
             try:
                 features = {
-                    "amount":           float(request.POST.get("amount", 500)),
-                    "hour_of_day":      float(request.POST.get("hour_of_day", 12)),
-                    "is_weekend":       float(request.POST.get("is_weekend", 0)),
-                    "is_interbank":     float(request.POST.get("is_interbank", 0)),
-                    "history_count":    float(request.POST.get("history_count", 10)),
-                    "fee_ratio":        float(request.POST.get("fee_ratio", 0.01)),
+                    "amount": float(request.POST.get("amount", 500)),
+                    "hour_of_day": float(request.POST.get("hour_of_day", 12)),
+                    "is_weekend": float(request.POST.get("is_weekend", 0)),
+                    "is_interbank": float(request.POST.get("is_interbank", 0)),
+                    "history_count": float(request.POST.get("history_count", 10)),
+                    "fee_ratio": float(request.POST.get("fee_ratio", 0.01)),
                     "txn_type_encoded": float(request.POST.get("txn_type_encoded", 0)),
                 }
                 ml_score = MLScoringService.predict(features)
@@ -311,10 +317,10 @@ class FraudReportAdmin(admin.ModelAdmin):
                 color = DECISION_COLORS.get(decision, "#999")
 
                 request.session["fraud_test_result"] = {
-                    "ml_score":      ml_score,
+                    "ml_score": ml_score,
                     "combined_score": combined_score,
-                    "decision":      decision,
-                    "color":         color,
+                    "decision": decision,
+                    "color": color,
                 }
             except (ValueError, TypeError) as e:
                 messages.error(request, f"Invalid input: {e}")
