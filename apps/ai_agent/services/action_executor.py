@@ -129,7 +129,7 @@ class ActionExecutor:
                 {
                     "id": str(n.id),
                     "title": n.title,
-                    "message": n.body,
+                    "message": n.message,
                     "created_at": n.created_at,
                 }
                 for n in items

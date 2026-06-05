@@ -21,9 +21,12 @@ class ConversationService:
     @staticmethod
     def get_or_create_conversation(user, conversation_id=None):
         if conversation_id:
-            return AgentConversation.objects.get(
-                id=conversation_id, user=user
-            )
+            try:
+                return AgentConversation.objects.get(
+                    id=conversation_id, user=user
+                )
+            except AgentConversation.DoesNotExist:
+                raise ValueError("Conversation not found or access denied.")
         return AgentConversation.objects.create(user=user)
 
     @staticmethod
