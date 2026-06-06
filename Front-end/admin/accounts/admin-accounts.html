@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EliraPay — Admin · Accounts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon"><i class="ti ti-building-bank"></i></div>
+    <span class="sidebar-logo-text">EliraPay</span>
+  </div>
+  <div class="sidebar-role-badge"><i class="ti ti-shield-lock"></i> Admin Panel</div>
+  <div class="sidebar-section">Overview</div>
+  <a class="nav-item" href="/admin/dashboard/admin-dashboard.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+  <div class="sidebar-section">Management</div>
+  <a class="nav-item" href="/admin/users/admin-users.html"><i class="ti ti-users"></i> Users</a>
+  <a class="nav-item active" href="/admin/accounts/admin-accounts.html"><i class="ti ti-wallet"></i> Accounts</a>
+  <a class="nav-item" href="/admin/loans/admin-loans.html"><i class="ti ti-coin"></i> Loans</a>
+  <a class="nav-item" href="/admin/transactions/admin-transactions.html"><i class="ti ti-arrows-right-left"></i> Transactions</a>
+  <a class="nav-item" href="/admin/installments/admin-installments.html"><i class="ti ti-receipt"></i> Installments</a>
+  <div class="sidebar-section">Security</div>
+  <a class="nav-item" href="/admin/fraud/admin-fraud.html"><i class="ti ti-shield-exclamation"></i> Fraud Reports</a>
+  <a class="nav-item" href="/admin/auditlogs/admin-auditlogs.html"><i class="ti ti-file-analytics"></i> Audit Logs</a>
+  <div class="sidebar-section">Communication</div>
+  <a class="nav-item" href="/admin/notifications/admin-notifications.html"><i class="ti ti-bell"></i> Notifications</a>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar-sm" id="sidebar-avatar">AD</div>
+      <div class="user-info">
+        <div class="user-name-sm" id="sidebar-name">Admin</div>
+        <div class="user-role-sm">Administrator</div>
+      </div>
+      <button class="logout-btn" onclick="logout()"><i class="ti ti-logout"></i></button>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Account Management</h1>
+      <p>View, filter and manage all bank accounts</p>
+    </div>
+    <a class="back-btn" href="/admin/dashboard/admin-dashboard.html"><i class="ti ti-arrow-left"></i> Dashboard</a>
+  </div>
+  <div class="content">
+
+    <!-- STATS -->
+    <div class="stats-strip">
+      <div class="stat-card">
+        <div class="stat-icon blue"><i class="ti ti-wallet"></i></div>
+        <div><div class="stat-label">Total Accounts</div><div class="stat-val" id="stat-total">—</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="ti ti-database-dollar"></i></div>
+        <div><div class="stat-label">Total Balance</div><div class="stat-val" id="stat-balance">—</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber"><i class="ti ti-lock"></i></div>
+        <div><div class="stat-label">Blocked Balance</div><div class="stat-val" id="stat-blocked">—</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red"><i class="ti ti-circle-x"></i></div>
+        <div><div class="stat-label">Closed Accounts</div><div class="stat-val" id="stat-closed">—</div></div>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters-card">
+      <div class="filters-row">
+        <div class="search-wrap">
+          <i class="ti ti-search"></i>
+          <input class="search-input" type="text" id="search" placeholder="Search by account number or IBAN…" />
+        </div>
+        <select class="filter-select" id="filter-status">
+          <option value="">All Statuses</option>
+          <option value="ACTIVE">Active</option>
+          <option value="BLOCKED">Blocked</option>
+          <option value="CLOSED">Closed</option>
+        </select>
+        <select class="filter-select" id="filter-type">
+          <option value="">All Types</option>
+          <option value="SAVING">Saving</option>
+          <option value="CURRENT">Current</option>
+          <option value="BUSINESS">Business</option>
+        </select>
+        <select class="filter-select" id="filter-currency">
+          <option value="">All Currencies</option>
+          <option value="EUR">EUR</option>
+          <option value="USD">USD</option>
+          <option value="TRY">TRY</option>
+        </select>
+        <button class="btn-filter primary" onclick="loadAccounts(1)"><i class="ti ti-filter"></i> Filter</button>
+        <button class="btn-filter ghost"   onclick="resetFilters()"><i class="ti ti-refresh"></i> Reset</button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-hdr">
+        <span class="table-hdr-title">Accounts</span>
+        <span class="table-count" id="table-count">—</span>
+      </div>
+      <div id="table-wrap"><div class="empty-state"><i class="ti ti-loader-2"></i><p>Loading…</p></div></div>
+      <div class="pagination" id="pagination" style="display:none;">
+        <span class="pag-info" id="pag-info">—</span>
+        <div class="pag-btns" id="pag-btns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DRAWER -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="acct-drawer">
+  <div class="drawer-header">
+    <span class="drawer-title">Account Detail</span>
+    <button class="drawer-close" onclick="closeDrawer()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="drawer-body" id="drawer-body"><div class="empty-state"><i class="ti ti-loader-2"></i><p>Loading…</p></div></div>
+  <div class="drawer-footer" id="drawer-footer"></div>
+</div>
+
+<!-- AMOUNT MODAL (deposit / withdraw / block-balance / unblock-balance) -->
+<div class="modal-overlay" id="amount-modal">
+  <div class="modal">
+    <div class="modal-header" id="amount-modal-title">Deposit</div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Amount</label>
+        <input type="number" id="modal-amount" placeholder="0.00" min="0.01" step="0.01" />
+        <div class="field-hint" id="amount-hint"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn ghost" onclick="closeAmountModal()">Cancel</button>
+      <button class="btn primary" id="amount-confirm-btn" onclick="confirmAmount()">
+        <div class="spinner" id="amount-spin"></div>
+        <span id="amount-btn-text">Confirm</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="scripts.js"> </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>EliraPay — Admin · Notifications</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="sidebar-logo-icon"><i class="ti ti-building-bank"></i></div><span class="sidebar-logo-text">EliraPay</span></div>
+  <div class="sidebar-role-badge"><i class="ti ti-shield-lock"></i> Admin Panel</div>
+  <div class="sidebar-section">Overview</div>
+  <a class="nav-item" href="/admin/dashboard/admin-dashboard.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+  <div class="sidebar-section">Management</div>
+  <a class="nav-item" href="/admin/users/admin-users.html"><i class="ti ti-users"></i> Users</a>
+  <a class="nav-item" href="/admin/accounts/admin-accounts.html"><i class="ti ti-wallet"></i> Accounts</a>
+  <a class="nav-item" href="/admin/loans/admin-loans.html"><i class="ti ti-coin"></i> Loans</a>
+  <a class="nav-item" href="/admin/transactions/admin-transactions.html"><i class="ti ti-arrows-right-left"></i> Transactions</a>
+  <a class="nav-item" href="/admin/installments/admin-installments.html"><i class="ti ti-receipt"></i> Installments</a>
+  <div class="sidebar-section">Security</div>
+  <a class="nav-item" href="/admin/fraud/admin-fraud.html"><i class="ti ti-shield-exclamation"></i> Fraud Reports</a>
+  <a class="nav-item" href="/admin/auditlogs/admin-auditlogs.html"><i class="ti ti-file-analytics"></i> Audit Logs</a>
+  <div class="sidebar-section">Communication</div>
+  <a class="nav-item active" href="/admin/notifications/admin-notifications.html"><i class="ti ti-bell"></i> Notifications</a>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar-sm" id="sidebar-avatar">AD</div>
+      <div class="user-info"><div class="user-name-sm" id="sidebar-name">Admin</div><div class="user-role-sm">Administrator</div></div>
+      <button class="logout-btn" onclick="logout()"><i class="ti ti-logout"></i></button>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left"><h1>Notifications</h1><p>Send and broadcast notifications to users</p></div>
+    <a class="back-btn" href="/admin/dashboard/admin-dashboard.html"><i class="ti ti-arrow-left"></i> Dashboard</a>
+  </div>
+  <div class="content">
+
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-compose" onclick="switchTab('compose')"><i class="ti ti-send"></i> Compose</button>
+      <button class="tab-btn" id="tab-history" onclick="switchTab('history')"><i class="ti ti-history"></i> Sent History</button>
+    </div>
+
+    <!-- COMPOSE -->
+    <div class="panel active" id="panel-compose">
+      <div class="compose-card">
+        <div class="compose-header">
+          <div class="compose-title">New Notification</div>
+          <div class="compose-sub">Send to a specific user or broadcast to all</div>
+        </div>
+
+        <!-- SUCCESS STATE -->
+        <div class="send-success" id="send-success">
+          <div class="success-circle"><i class="ti ti-send"></i></div>
+          <div class="success-title">Notification Sent!</div>
+          <div class="success-sub" id="success-sub">Your notification has been delivered.</div>
+          <button class="btn primary" style="margin:1.5rem auto 0;justify-content:center;" onclick="resetCompose()"><i class="ti ti-plus"></i> Send Another</button>
+        </div>
+
+        <div id="compose-form">
+          <div class="compose-body">
+
+            <!-- TARGET TOGGLE -->
+            <div class="field">
+              <label>Send To</label>
+              <div class="target-toggle">
+                <button class="target-btn active" id="tgt-individual" onclick="setTarget('individual')"><i class="ti ti-user"></i> Specific User</button>
+                <button class="target-btn" id="tgt-broadcast" onclick="setTarget('broadcast')"><i class="ti ti-speakerphone"></i> Broadcast to All</button>
+              </div>
+            </div>
+
+            <!-- USER ID FIELD (shown for individual) -->
+            <div class="field" id="user-field">
+              <label for="target-user">User ID</label>
+              <input type="text" id="target-user" placeholder="e.g. 42 or uuid…"/>
+              <div class="field-hint">Enter the user's ID to send a targeted notification</div>
+              <div class="field-error" id="err-user">Please enter a valid user ID.</div>
+            </div>
+
+            <div class="fields-grid">
+              <div class="field">
+                <label for="notif-title">Title</label>
+                <input type="text" id="notif-title" placeholder="Notification title…" maxlength="100"/>
+                <div class="field-error" id="err-title">Please enter a title.</div>
+              </div>
+              <div class="field">
+                <label for="notif-type">Type</label>
+                <select id="notif-type">
+                  <option value="INFO">Info</option>
+                  <option value="SUCCESS">Success</option>
+                  <option value="WARNING">Warning</option>
+                  <option value="ERROR">Error</option>
+                  <option value="LOAN_UPDATE">Loan Update</option>
+                  <option value="TRANSACTION">Transaction</option>
+                  <option value="SECURITY">Security</option>
+                  <option value="SYSTEM">System</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="notif-message">Message</label>
+              <textarea id="notif-message" placeholder="Write your notification message here…" maxlength="500"></textarea>
+              <div style="text-align:right;font-size:11.5px;color:var(--text-3);margin-top:3px;"><span id="char-count">0</span>/500</div>
+              <div class="field-error" id="err-message">Please enter a message.</div>
+            </div>
+
+            <!-- BROADCAST CONFIRM WARNING -->
+            <div id="broadcast-warning" style="display:none;background:var(--warning-bg);border:1.5px solid #fde68a;border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--warning);">
+              <i class="ti ti-alert-triangle" style="font-size:18px;flex-shrink:0;"></i>
+              <span>This will send a notification to <strong>all users</strong> in the system. Please review carefully before sending.</span>
+            </div>
+
+          </div>
+          <div class="compose-footer">
+            <button class="btn ghost" onclick="resetCompose()"><i class="ti ti-refresh"></i> Clear</button>
+            <button class="btn primary" id="send-btn" onclick="sendNotification()">
+              <div class="spinner" id="send-spin"></div>
+              <i class="ti ti-send" id="send-icon"></i>
+              <span id="send-text">Send Notification</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="panel" id="panel-history">
+      <div class="table-card">
+        <div class="table-hdr">
+          <span class="table-hdr-title">Sent Notifications</span>
+          <span class="table-count" id="history-count">—</span>
+        </div>
+        <div id="history-list"><div class="empty-state"><i class="ti ti-loader-2"></i><p>Loading…</p></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<script src="scripts.js"></script>
+</body>
+</html>

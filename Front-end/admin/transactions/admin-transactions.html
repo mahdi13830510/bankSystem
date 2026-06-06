@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>EliraPay — Admin · Transactions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon"><i class="ti ti-building-bank"></i></div>
+    <span class="sidebar-logo-text">EliraPay</span>
+  </div>
+  <div class="sidebar-role-badge"><i class="ti ti-shield-lock"></i> Admin Panel</div>
+  <div class="sidebar-section">Overview</div>
+  <a class="nav-item" href="/admin/dashboard/admin-dashboard.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+  <div class="sidebar-section">Management</div>
+  <a class="nav-item" href="/admin/users/admin-users.html"><i class="ti ti-users"></i> Users</a>
+  <a class="nav-item" href="/admin/accounts/admin-accounts.html"><i class="ti ti-wallet"></i> Accounts</a>
+  <a class="nav-item" href="/admin/loans/admin-loans.html"><i class="ti ti-coin"></i> Loans</a>
+  <a class="nav-item active" href="/admin/transactions/admin-transactions.html"><i class="ti ti-arrows-right-left"></i> Transactions</a>
+  <a class="nav-item" href="/admin/installments/admin-installments.html"><i class="ti ti-receipt"></i> Installments</a>
+  <div class="sidebar-section">Security</div>
+  <a class="nav-item" href="/admin/fraud/admin-fraud.html"><i class="ti ti-shield-exclamation"></i> Fraud Reports</a>
+  <a class="nav-item" href="/admin/auditlogs/admin-auditlogs.html"><i class="ti ti-file-analytics"></i> Audit Logs</a>
+  <div class="sidebar-section">Communication</div>
+  <a class="nav-item" href="/admin/notifications/admin-notifications.html"><i class="ti ti-bell"></i> Notifications</a>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar-sm" id="sidebar-avatar">AD</div>
+      <div class="user-info">
+        <div class="user-name-sm" id="sidebar-name">Admin</div>
+        <div class="user-role-sm">Administrator</div>
+      </div>
+      <button class="logout-btn" onclick="logout()"><i class="ti ti-logout"></i></button>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left"><h1>Transaction Management</h1><p>Search, inspect and reverse transactions</p></div>
+    <a class="back-btn" href="/admin/dashboard/admin-dashboard.html"><i class="ti ti-arrow-left"></i> Dashboard</a>
+  </div>
+  <div class="content">
+
+    <!-- FILTERS -->
+    <div class="filters-card">
+      <div class="filters-row">
+        <div class="search-wrap">
+          <i class="ti ti-hash"></i>
+          <input class="search-input" id="search-ref" type="text" placeholder="Search by reference number…"/>
+        </div>
+        <select class="filter-select" id="filter-type">
+          <option value="">All Types</option>
+          <option value="CARD_TO_CARD">Card to Card</option>
+          <option value="IBAN_TRANSFER">IBAN Transfer</option>
+          <option value="INTERNAL_TRANSFER">Internal Transfer</option>
+          <option value="CASH_DEPOSIT">Cash Deposit</option>
+          <option value="CASH_WITHDRAW">Cash Withdraw</option>
+          <option value="LOAN_DISBURSEMENT">Loan Disbursement</option>
+          <option value="INSTALLMENT_PAYMENT">Installment Payment</option>
+          <option value="REFUND">Refund</option>
+          <option value="LATE_FEE">Late Fee</option>
+        </select>
+        <select class="filter-select" id="filter-status">
+          <option value="">All Statuses</option>
+          <option value="SUCCESS">Success</option>
+          <option value="PENDING">Pending</option>
+          <option value="FAILED">Failed</option>
+          <option value="BLOCKED">Blocked</option>
+          <option value="REVERSED">Reversed</option>
+        </select>
+        <input class="filter-date" type="date" id="filter-from" title="From date"/>
+        <input class="filter-date" type="date" id="filter-to" title="To date"/>
+        <button class="btn-filter primary" onclick="loadTx(1)"><i class="ti ti-filter"></i> Filter</button>
+        <button class="btn-filter ghost" onclick="resetFilters()"><i class="ti ti-refresh"></i> Reset</button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-hdr">
+        <span class="table-hdr-title">Transactions</span>
+        <span class="table-count" id="table-count">—</span>
+      </div>
+      <div id="table-wrap"><div class="empty-state"><i class="ti ti-loader-2"></i><p>Loading…</p></div></div>
+      <div class="pagination" id="pagination" style="display:none;">
+        <span class="pag-info" id="pag-info">—</span>
+        <div class="pag-btns" id="pag-btns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DRAWER -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="tx-drawer">
+  <div class="drawer-header">
+    <span class="drawer-title">Transaction Detail</span>
+    <button class="drawer-close" onclick="closeDrawer()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+  <div class="drawer-footer" id="drawer-footer"></div>
+</div>
+
+<!-- REVERSE CONFIRM MODAL -->
+<div class="modal-overlay" id="reverse-modal">
+  <div class="modal">
+    <div class="modal-header">Reverse Transaction</div>
+    <div class="modal-body">Are you sure you want to reverse this transaction? This will create a refund transaction and restore the original account balance. This action cannot be undone.</div>
+    <div class="modal-footer">
+      <button class="btn ghost" onclick="closeReverseModal()">Cancel</button>
+      <button class="btn danger" id="reverse-btn" onclick="confirmReverse()">
+        <div class="spinner" id="reverse-spin"></div>
+        <span id="reverse-text"><i class="ti ti-rotate-clockwise-2"></i> Confirm Reverse</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="scripts.js"></script>
+</body>
+</html>

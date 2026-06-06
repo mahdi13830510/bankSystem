@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EliraPay — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="wrapper">
+  <div class="logo">
+    <div class="logo-icon"><i class="ti ti-building-bank"></i></div>
+    <span class="logo-text">EliraPay</span>
+  </div>
+
+  <div class="card">
+    <!-- STEP BAR -->
+    <div class="steps-bar">
+      <div class="step-item active" id="step-1">
+        <div class="step-dot" id="dot-1">1</div>
+        <span class="step-label">Credentials</span>
+      </div>
+      <div class="step-line" id="line-1"></div>
+      <div class="step-item" id="step-2">
+        <div class="step-dot" id="dot-2">2</div>
+        <span class="step-label">Verify OTP</span>
+      </div>
+    </div>
+
+    <!-- GLOBAL MESSAGES -->
+    <div class="msg error" id="global-error"><i class="ti ti-alert-circle"></i><span id="global-error-text"></span></div>
+    <div class="msg success" id="global-success"><i class="ti ti-circle-check"></i><span id="global-success-text"></span></div>
+
+    <!-- STEP 1: Phone + Password -->
+    <div class="panel active" id="panel-step1">
+      <div class="form-title">Welcome back</div>
+      <div class="form-sub">Sign in to your EliraPay account</div>
+
+      <div class="field">
+        <label for="phone">Phone number</label>
+        <div class="input-wrap">
+          <i class="ti ti-phone pfx"></i>
+          <input type="tel" id="phone" placeholder="+49 000 000 0000" autocomplete="tel"/>
+        </div>
+        <div class="field-error" id="err-phone">Please enter a valid phone number.</div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <i class="ti ti-lock pfx"></i>
+          <input type="password" id="password" placeholder="Your password" autocomplete="current-password"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('password',this)" tabindex="-1"><i class="ti ti-eye"></i></button>
+        </div>
+        <div class="field-error" id="err-password">Please enter your password.</div>
+      </div>
+
+      <button class="submit-btn" id="btn-login" onclick="handleLogin()">
+        <div class="spinner" id="spin-login"></div>
+        <span id="text-login">Continue</span>
+      </button>
+
+      <div class="card-footer">Don't have an account? <a href="signup.html">Create one</a></div>
+    </div>
+
+    <!-- STEP 2: OTP Verification -->
+    <div class="panel" id="panel-step2">
+      <div class="form-title">Verify your identity</div>
+      <div class="form-sub" id="otp-sub">Enter the 6-digit code sent to your phone.</div>
+
+      <div class="otp-boxes">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" id="otp0"/>
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" id="otp1"/>
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" id="otp2"/>
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" id="otp3"/>
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" id="otp4"/>
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" id="otp5"/>
+      </div>
+
+      <div class="otp-hint" id="otp-countdown"></div>
+
+      <button class="submit-btn" id="btn-otp" onclick="handleOtp()" style="margin-top:1.25rem;">
+        <div class="spinner" id="spin-otp"></div>
+        <span id="text-otp">Verify &amp; Sign In</span>
+      </button>
+
+      <div class="card-footer" style="margin-top:1rem;">
+        <a href="#" onclick="goBackToStep1(event)">← Use a different account</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">Protected by 256-bit encryption &nbsp;·&nbsp; EliraPay &copy; 2026</div>
+</div>
+
+<script src="scripts.js"></script>
+</body>
+</html>

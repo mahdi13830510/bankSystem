@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EliraPay — Admin · Users</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon"><i class="ti ti-building-bank"></i></div>
+    <span class="sidebar-logo-text">EliraPay</span>
+  </div>
+  <div class="sidebar-role-badge"><i class="ti ti-shield-lock"></i> Admin Panel</div>
+  <div class="sidebar-section">Overview</div>
+  <a class="nav-item" href="/admin/dashboard/admin-dashboard.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+  <div class="sidebar-section">Management</div>
+  <a class="nav-item active" href="/admin/users/admin-users.html"><i class="ti ti-users"></i> Users</a>
+  <a class="nav-item" href="/admin/accounts/admin-accounts.html"><i class="ti ti-wallet"></i> Accounts</a>
+  <a class="nav-item" href="/admin/loans/admin-loans.html"><i class="ti ti-coin"></i> Loans</a>
+  <a class="nav-item" href="/admin/transactions/admin-transactions.html"><i class="ti ti-arrows-right-left"></i> Transactions</a>
+  <a class="nav-item" href="/admin/installments/admin-installments.html"><i class="ti ti-receipt"></i> Installments</a>
+  <div class="sidebar-section">Security</div>
+  <a class="nav-item" href="/admin/fraud/admin-fraud.html"><i class="ti ti-shield-exclamation"></i> Fraud Reports</a>
+  <a class="nav-item" href="/admin/auditlogs/admin-auditlogs.html"><i class="ti ti-file-analytics"></i> Audit Logs</a>
+  <div class="sidebar-section">Communication</div>
+  <a class="nav-item" href="/admin/notifications/admin-notifications.html"><i class="ti ti-bell"></i> Notifications</a>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar-sm" id="sidebar-avatar">AD</div>
+      <div class="user-info">
+        <div class="user-name-sm" id="sidebar-name">Admin</div>
+        <div class="user-role-sm">Administrator</div>
+      </div>
+      <button class="logout-btn" onclick="logout()"><i class="ti ti-logout"></i></button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>User Management</h1>
+      <p>View, filter, and manage all system users</p>
+    </div>
+    <a class="back-btn" href="/admin/dashboard/admin-dashboard.html"><i class="ti ti-arrow-left"></i> Dashboard</a>
+  </div>
+
+  <div class="content">
+
+    <!-- FILTERS -->
+    <div class="filters-card">
+      <div class="filters-row">
+        <div class="search-wrap">
+          <i class="ti ti-search"></i>
+          <input class="search-input" type="text" id="search" placeholder="Search by name, phone, email, national code…" />
+        </div>
+        <select class="filter-select" id="filter-status">
+          <option value="">All Statuses</option>
+          <option value="active">Active</option>
+          <option value="pending">Pending</option>
+          <option value="blocked">Blocked</option>
+          <option value="suspended">Suspended</option>
+        </select>
+        <select class="filter-select" id="filter-role">
+          <option value="">All Roles</option>
+          <option value="customer">Customer</option>
+          <option value="employee">Employee</option>
+          <option value="manager">Manager</option>
+          <option value="admin">Admin</option>
+        </select>
+        <select class="filter-select" id="filter-verified">
+          <option value="">Verified?</option>
+          <option value="true">Verified</option>
+          <option value="false">Unverified</option>
+        </select>
+        <button class="btn-filter primary" onclick="loadUsers(1)"><i class="ti ti-filter"></i> Filter</button>
+        <button class="btn-filter ghost"   onclick="resetFilters()"><i class="ti ti-refresh"></i> Reset</button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-hdr">
+        <span class="table-hdr-title">Users</span>
+        <span class="table-count" id="table-count">— results</span>
+      </div>
+      <div id="table-wrap">
+        <div class="empty-state"><i class="ti ti-loader-2"></i><p>Loading users…</p></div>
+      </div>
+      <div class="pagination" id="pagination" style="display:none;">
+        <span class="pag-info" id="pag-info">—</span>
+        <div class="pag-btns" id="pag-btns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DRAWER overlay -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+
+<!-- USER DETAIL DRAWER -->
+<div class="drawer" id="user-drawer">
+  <div class="drawer-header">
+    <span class="drawer-title">User Detail</span>
+    <button class="drawer-close" onclick="closeDrawer()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="drawer-body" id="drawer-body">
+    <div class="empty-state"><i class="ti ti-loader-2"></i><p>Loading…</p></div>
+  </div>
+  <div class="drawer-footer" id="drawer-footer"></div>
+</div>
+
+<!-- BLOCK MODAL -->
+<div class="modal-overlay" id="block-modal">
+  <div class="modal">
+    <div class="modal-header">Block User</div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Reason (optional)</label>
+        <textarea id="block-reason" placeholder="Enter reason for blocking…"></textarea>
+      </div>
+      <div class="field">
+        <label>Block Until (leave empty = permanent)</label>
+        <input type="datetime-local" id="block-until" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn ghost" onclick="closeBlockModal()">Cancel</button>
+      <button class="btn danger" id="block-confirm-btn" onclick="confirmBlock()">
+        <div class="spinner" id="block-spin"></div>
+        <span id="block-text"><i class="ti ti-lock"></i> Block User</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD MODAL -->
+<div class="modal-overlay" id="pw-modal">
+  <div class="modal">
+    <div class="modal-header">Reset Password</div>
+    <div class="modal-body">
+      <div class="field">
+        <label>New Password (min 8 characters)</label>
+        <input type="password" id="new-password" placeholder="Enter new password" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn ghost" onclick="closePwModal()">Cancel</button>
+      <button class="btn primary" id="pw-confirm-btn" onclick="confirmResetPw()">
+        <div class="spinner" id="pw-spin"></div>
+        <span id="pw-text"><i class="ti ti-key"></i> Reset Password</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE ROLE MODAL -->
+<div class="modal-overlay" id="role-modal">
+  <div class="modal">
+    <div class="modal-header">Change Role</div>
+    <div class="modal-body">
+      <div class="field">
+        <label>New Role</label>
+        <select id="new-role">
+          <option value="customer">Customer</option>
+          <option value="employee">Employee</option>
+          <option value="manager">Manager</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn ghost" onclick="closeRoleModal()">Cancel</button>
+      <button class="btn primary" id="role-confirm-btn" onclick="confirmChangeRole()">
+        <div class="spinner" id="role-spin"></div>
+        <span id="role-text"><i class="ti ti-user-cog"></i> Change Role</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="scripts.js"></script>
+</body>
+</html>
