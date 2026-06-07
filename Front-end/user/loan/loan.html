@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>EliraPay — Loans</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="sidebar-logo-icon"><i class="ti ti-building-bank"></i></div><span class="sidebar-logo-text">EliraPay</span></div>
+  <div class="sidebar-section">Main</div>
+  <a class="nav-item" href="../../user/dashboard/dashboard.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+  <a class="nav-item" href="#"><i class="ti ti-bell"></i> Notifications</a>
+  <div class="sidebar-section">Services</div>
+  <a class="nav-item" href="../../user/transfer/transfer.html"><i class="ti ti-arrows-right-left"></i> Transfer Money</a>
+  <a class="nav-item active" href="../../user/loan/loan.html"><i class="ti ti-coin"></i> Loans</a>
+  <a class="nav-item" href="../../user/installments/installments.html"><i class="ti ti-receipt"></i> Installments</a>
+  <a class="nav-item" href="../../user/statement/statement.html"><i class="ti ti-file-description"></i> Statement</a>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">--</div>
+      <div class="user-info"><div class="user-name" id="sidebar-name">My Account</div><div class="user-role">Customer</div></div>
+      <button class="logout-btn" onclick="logout()"><i class="ti ti-logout"></i></button>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left"><h1>Loans</h1><p>Request and manage your loans</p></div>
+    <a class="back-btn" href="../../user/dashboard/dashboard.html"><i class="ti ti-arrow-left"></i> Dashboard</a>
+  </div>
+  <div class="content">
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-request"     onclick="switchTab('request')"><i class="ti ti-plus"></i> Request a Loan</button>
+      <button class="tab-btn"        id="tab-my-requests" onclick="switchTab('my-requests')"><i class="ti ti-clock"></i> My Requests <span class="tab-count" id="req-count">—</span></button>
+      <button class="tab-btn"        id="tab-my-loans"    onclick="switchTab('my-loans')"><i class="ti ti-coin"></i> My Loans <span class="tab-count" id="loan-count">—</span></button>
+    </div>
+
+    <!-- REQUEST -->
+    <div class="panel active" id="panel-request">
+      <div class="form-card">
+        <div class="form-header">
+          <div class="form-header-title">Apply for a Loan</div>
+          <div class="form-header-sub">Fill in the details — we'll review your application within 24 hours</div>
+        </div>
+        <div class="form-body">
+          <div class="field" style="margin-bottom:1.5rem;">
+            <label>Loan Type</label>
+            <div class="type-grid" id="type-grid">
+              <div class="type-card selected" data-type="PERSONAL" onclick="selectType(this)"><i class="ti ti-user type-icon"></i><div class="type-name">Personal</div></div>
+              <div class="type-card" data-type="HOME"     onclick="selectType(this)"><i class="ti ti-home type-icon"></i><div class="type-name">Home</div></div>
+              <div class="type-card" data-type="CAR"      onclick="selectType(this)"><i class="ti ti-car type-icon"></i><div class="type-name">Car</div></div>
+              <div class="type-card" data-type="BUSINESS" onclick="selectType(this)"><i class="ti ti-briefcase type-icon"></i><div class="type-name">Business</div></div>
+            </div>
+            <div class="field-error" id="err-type">Please select a loan type.</div>
+          </div>
+
+          <div class="field full" style="margin-bottom:1.5rem;">
+            <label>Loan Amount</label>
+            <div class="amount-display">€<span id="amount-display">10,000</span></div>
+            <input type="range" id="amount-range" min="1000" max="100000" step="500" value="10000" oninput="updateAmount(this)"/>
+            <div class="range-labels"><span>€1,000</span><span>€100,000</span></div>
+            <div class="field-error" id="err-amount">Please select a loan amount.</div>
+          </div>
+
+          <div class="fields-grid">
+            <div class="field">
+              <label for="duration">Duration (months)</label>
+              <div class="input-wrap">
+                <select id="duration" onchange="updateSummary()">
+                  <option value="">Select duration</option>
+                  <option value="6">6 months</option>
+                  <option value="12">12 months</option>
+                  <option value="24">24 months</option>
+                  <option value="36">36 months</option>
+                  <option value="48">48 months</option>
+                  <option value="60">60 months</option>
+                  <option value="84">84 months</option>
+                  <option value="120">120 months</option>
+                </select>
+              </div>
+              <div class="field-error" id="err-duration">Please select a duration.</div>
+            </div>
+            <div class="field">
+              <label for="monthly-income">Monthly Income</label>
+              <div class="input-wrap"><span class="prefix">€</span><input type="number" id="monthly-income" placeholder="3,500" min="0"/></div>
+              <div class="field-error" id="err-income">Please enter your monthly income.</div>
+            </div>
+            <div class="field full">
+              <label for="existing-debt">Existing Debt</label>
+              <div class="input-wrap"><span class="prefix">€</span><input type="number" id="existing-debt" placeholder="0" min="0" value="0"/></div>
+              <div class="field-hint">Enter 0 if you have no existing debt</div>
+            </div>
+          </div>
+
+          <div class="loan-summary">
+            <div class="summary-item"><div class="summary-label">Est. Monthly Payment</div><div class="summary-val accent" id="est-monthly">—</div></div>
+            <div class="summary-item"><div class="summary-label">Total Repayable</div><div class="summary-val" id="est-total">—</div></div>
+            <div class="summary-item"><div class="summary-label">Interest Rate</div><div class="summary-val">6.5% p.a.</div></div>
+          </div>
+        </div>
+        <div class="form-footer">
+          <button class="btn btn-ghost" onclick="resetForm()"><i class="ti ti-refresh"></i> Reset</button>
+          <button class="btn btn-primary" id="submit-btn" onclick="submitLoanRequest()">
+            <div class="spinner" id="submit-spin"></div>
+            <i class="ti ti-send" id="submit-icon"></i>
+            <span id="submit-text">Submit Application</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MY REQUESTS -->
+    <div class="panel" id="panel-my-requests">
+      <div class="list-wrap" id="requests-list"><div class="empty-state"><i class="ti ti-loader-2"></i><p>Loading…</p></div></div>
+    </div>
+
+    <!-- MY LOANS -->
+    <div class="panel" id="panel-my-loans">
+      <div class="list-wrap" id="loans-list"><div class="empty-state"><i class="ti ti-loader-2"></i><p>Loading…</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <div class="modal-title">Confirm Application</div>
+    <div class="modal-body" id="confirm-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="confirm-btn" onclick="confirmSubmit()">
+        <div class="spinner" id="confirm-spin"></div>
+        <span id="confirm-text">Confirm &amp; Submit</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="scripts.js"></script>
+</body>
+</html>

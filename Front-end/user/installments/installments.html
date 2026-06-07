@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>EliraPay — Installments</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="sidebar-logo-icon"><i class="ti ti-building-bank"></i></div><span class="sidebar-logo-text">EliraPay</span></div>
+  <div class="sidebar-section">Main</div>
+  <a class="nav-item" href="../../user/dashboard/dashboard.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+  <a class="nav-item" href="#"><i class="ti ti-bell"></i> Notifications</a>
+  <div class="sidebar-section">Services</div>
+  <a class="nav-item" href="../../user/transfer/transfer.html"><i class="ti ti-arrows-right-left"></i> Transfer Money</a>
+  <a class="nav-item" href="../../user/loan/loan.html"><i class="ti ti-coin"></i> Loans</a>
+  <a class="nav-item active" href="../../user/installments/installments.html"><i class="ti ti-receipt"></i> Installments</a>
+  <a class="nav-item" href="../../user/statement/statement.html"><i class="ti ti-file-description"></i> Statement</a>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">--</div>
+      <div class="user-info"><div class="user-name" id="sidebar-name">My Account</div><div class="user-role">Customer</div></div>
+      <button class="logout-btn" onclick="logout()"><i class="ti ti-logout"></i></button>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left"><h1>Installments</h1><p>Track and pay your loan installments</p></div>
+    <a class="back-btn" href="../../user/dashboard/dashboard.html"><i class="ti ti-arrow-left"></i> Dashboard</a>
+  </div>
+  <div class="content">
+    <div class="summary-strip">
+      <div class="strip-card"><div class="strip-icon blue"><i class="ti ti-receipt"></i></div><div><div class="strip-label">Total</div><div class="strip-val" id="stat-total">—</div></div></div>
+      <div class="strip-card"><div class="strip-icon green"><i class="ti ti-circle-check"></i></div><div><div class="strip-label">Paid</div><div class="strip-val" id="stat-paid">—</div></div></div>
+      <div class="strip-card"><div class="strip-icon amber"><i class="ti ti-clock"></i></div><div><div class="strip-label">Pending</div><div class="strip-val" id="stat-pending">—</div></div></div>
+      <div class="strip-card"><div class="strip-icon red"><i class="ti ti-alert-triangle"></i></div><div><div class="strip-label">Overdue</div><div class="strip-val" id="stat-overdue">—</div></div></div>
+    </div>
+    <div id="groups-container"><div class="empty-state"><i class="ti ti-loader-2"></i><p>Loading installments…</p></div></div>
+  </div>
+</div>
+
+<!-- PAY MODAL -->
+<div class="modal-overlay" id="pay-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Confirm Payment</span><button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="modal-row"><span class="modal-row-label">Installment #</span><span class="modal-row-val" id="m-number">—</span></div>
+      <div class="modal-row"><span class="modal-row-label">Due Date</span><span class="modal-row-val" id="m-due">—</span></div>
+      <div class="modal-row"><span class="modal-row-label">Amount</span><span class="modal-row-val accent" id="m-amount">—</span></div>
+      <div class="modal-row" id="m-penalty-row"><span class="modal-row-label">Penalty</span><span class="modal-row-val danger" id="m-penalty">—</span></div>
+      <div class="modal-total"><span class="modal-total-label">Total Due</span><span class="modal-total-val" id="m-total">—</span></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="pay-confirm-btn" onclick="confirmPay()">
+        <div class="spinner" id="pay-spin"></div>
+        <i class="ti ti-credit-card" id="pay-icon"></i>
+        <span id="pay-text">Pay Now</span>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<script src="scripts.js"></script>
+</body>
+</html>

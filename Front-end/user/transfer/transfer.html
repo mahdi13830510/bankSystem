@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>EliraPay — Transfer Money</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="sidebar-logo-icon"><i class="ti ti-building-bank"></i></div><span class="sidebar-logo-text">EliraPay</span></div>
+  <div class="sidebar-section">Main</div>
+  <a class="nav-item" href="../../user/dashboard/dashboard.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+  <a class="nav-item" href="#"><i class="ti ti-bell"></i> Notifications</a>
+  <div class="sidebar-section">Services</div>
+  <a class="nav-item active" href="../../user/transfer/transfer.html"><i class="ti ti-arrows-right-left"></i> Transfer Money</a>
+  <a class="nav-item" href="../../user/loan/loan.html"><i class="ti ti-coin"></i> Loans</a>
+  <a class="nav-item" href="../../user/installments/installments.html"><i class="ti ti-receipt"></i> Installments</a>
+  <a class="nav-item" href="../../user/statement/statement.html"><i class="ti ti-file-description"></i> Statement</a>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">--</div>
+      <div class="user-info"><div class="user-name" id="sidebar-name">My Account</div><div class="user-role">Customer</div></div>
+      <button class="logout-btn" onclick="logout()"><i class="ti ti-logout"></i></button>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left"><h1>Transfer Money</h1><p>Send money instantly via card or IBAN</p></div>
+    <a class="back-btn" href="../../user/dashboard/dashboard.html"><i class="ti ti-arrow-left"></i> Dashboard</a>
+  </div>
+  <div class="content">
+    <div class="form-outer">
+      <!-- METHOD TOGGLE -->
+      <div class="method-toggle">
+        <button class="method-btn active" id="btn-card" onclick="setMethod('card')">
+          <i class="ti ti-credit-card"></i>
+          <div class="method-label"><span class="method-name">Card Transfer</span><span class="method-sub">Use card number</span></div>
+        </button>
+        <button class="method-btn" id="btn-iban" onclick="setMethod('iban')">
+          <i class="ti ti-building-bank"></i>
+          <div class="method-label"><span class="method-name">IBAN Transfer</span><span class="method-sub">Use bank account</span></div>
+        </button>
+      </div>
+
+      <!-- FORM CARD -->
+      <div class="form-card" id="form-card">
+        <div class="card-visual">
+          <div class="cv-label">TRANSFER METHOD</div>
+          <div class="cv-method" id="cv-method">Card Transfer</div>
+          <div class="cv-sub" id="cv-sub">Enter the recipient's card number to send money</div>
+          <i class="ti ti-credit-card cv-icon" id="cv-icon"></i>
+        </div>
+
+        <div class="form-body" id="form-body">
+          <!-- Source account -->
+          <div class="field">
+            <label>From (Your Account)</label>
+            <div class="source-badge">
+              <i class="ti ti-wallet"></i>
+              <span id="source-display">My Account</span>
+              <span class="source-tag">Primary</span>
+            </div>
+          </div>
+
+          <!-- Card destination -->
+          <div class="field" id="field-card-dest">
+            <label for="card-dest">Recipient Card Number</label>
+            <div class="input-wrap">
+              <i class="ti ti-credit-card input-icon"></i>
+              <input type="text" id="card-dest" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)" autocomplete="off"/>
+            </div>
+            <div class="field-error" id="err-card-dest">Please enter a valid 16-digit card number.</div>
+          </div>
+
+          <!-- IBAN destination -->
+          <div class="field" id="field-iban-dest" style="display:none;">
+            <label for="iban-dest">Recipient IBAN</label>
+            <div class="input-wrap">
+              <i class="ti ti-building-bank input-icon"></i>
+              <input type="text" id="iban-dest" placeholder="DE89 3704 0044 0532 0130 00" maxlength="34" oninput="formatIban(this)" autocomplete="off" style="text-transform:uppercase;"/>
+            </div>
+            <div class="field-error" id="err-iban-dest">Please enter a valid IBAN.</div>
+          </div>
+
+          <!-- Amount -->
+          <div class="field">
+            <label>Amount</label>
+            <div class="amount-wrap">
+              <span class="amount-prefix">€</span>
+              <input class="amount-input" type="number" id="amount" placeholder="0.00" min="0.01" step="0.01"/>
+            </div>
+            <div class="field-error" id="err-amount">Please enter a valid amount greater than 0.</div>
+          </div>
+
+          <!-- Description -->
+          <div class="field">
+            <label>Description <span style="color:var(--text-3);font-weight:400;">(optional)</span></label>
+            <div class="input-wrap">
+              <i class="ti ti-message input-icon"></i>
+              <textarea id="description" placeholder="e.g. Rent for June, Birthday gift…"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Success state -->
+        <div class="success-overlay" id="success-overlay">
+          <div class="success-circle"><i class="ti ti-circle-check"></i></div>
+          <div class="success-title">Transfer Successful!</div>
+          <div class="success-sub" id="success-sub">Your money has been sent successfully.</div>
+          <div class="success-detail" id="success-detail"></div>
+          <div class="success-actions">
+            <button class="btn btn-ghost" onclick="newTransfer()"><i class="ti ti-plus"></i> New Transfer</button>
+            <a class="btn btn-primary" href="../../user/dashboard/dashboard.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+          </div>
+        </div>
+
+        <div class="form-footer" id="form-footer">
+          <button class="btn btn-ghost" onclick="resetForm()"><i class="ti ti-refresh"></i> Clear</button>
+          <button class="btn btn-primary" id="submit-btn" onclick="openConfirm()">
+            <i class="ti ti-send" id="submit-icon"></i>
+            <span id="submit-text">Review Transfer</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-icon"><i class="ti ti-send"></i></div>
+      <div class="modal-title">Confirm Transfer</div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-amount" id="modal-amount">€0.00</div>
+      <div class="modal-row"><span class="modal-row-label">Method</span><span class="modal-row-val" id="modal-method">—</span></div>
+      <div class="modal-row"><span class="modal-row-label">To</span><span class="modal-row-val" id="modal-dest">—</span></div>
+      <div class="modal-row" id="modal-desc-row"><span class="modal-row-label">Description</span><span class="modal-row-val" id="modal-desc">—</span></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-primary" id="confirm-btn" onclick="submitTransfer()">
+        <div class="spinner" id="confirm-spin"></div>
+        <i class="ti ti-send" id="confirm-icon"></i>
+        <span id="confirm-text">Send Money</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="scripts.js"></script>
+</body>
+</html>

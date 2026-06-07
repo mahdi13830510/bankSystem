@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>EliraPay — Statement</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="sidebar-logo-icon"><i class="ti ti-building-bank"></i></div><span class="sidebar-logo-text">EliraPay</span></div>
+  <div class="sidebar-section">Main</div>
+  <a class="nav-item" href="../../user/dashboard/dashboard.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+  <a class="nav-item" href="#"><i class="ti ti-bell"></i> Notifications</a>
+  <div class="sidebar-section">Services</div>
+  <a class="nav-item" href="../../user/transfer/transfer.html"><i class="ti ti-arrows-right-left"></i> Transfer Money</a>
+  <a class="nav-item" href="../../user/loan/loan.html"><i class="ti ti-coin"></i> Loans</a>
+  <a class="nav-item" href="../../user/installments/installments.html"><i class="ti ti-receipt"></i> Installments</a>
+  <a class="nav-item active" href="../../user/statement/statement.html"><i class="ti ti-file-description"></i> Statement</a>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">--</div>
+      <div class="user-info"><div class="user-name" id="sidebar-name">My Account</div><div class="user-role">Customer</div></div>
+      <button class="logout-btn" onclick="logout()"><i class="ti ti-logout"></i></button>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left"><h1>Account Statement</h1><p>Full transaction history for your account</p></div>
+    <div class="topbar-right">
+      <button class="export-btn" id="export-btn" onclick="exportPDF()"><i class="ti ti-file-type-pdf"></i> Export PDF</button>
+      <a class="back-btn" href="../../user/dashboard/dashboard.html"><i class="ti ti-arrow-left"></i> Dashboard</a>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- PDF header (print only) -->
+    <div class="pdf-header" id="pdf-header">
+      <div class="pdf-header-logo">EliraPay</div>
+      <div class="pdf-header-sub">Account Statement · Generated <span id="pdf-date"></span></div>
+    </div>
+
+    <!-- SUMMARY STRIP -->
+    <div class="summary-strip">
+      <div class="strip-card"><div class="strip-icon blue"><i class="ti ti-list"></i></div><div><div class="strip-label">Total Transactions</div><div class="strip-val" id="stat-total">—</div></div></div>
+      <div class="strip-card"><div class="strip-icon green"><i class="ti ti-arrow-down-left"></i></div><div><div class="strip-label">Total Income</div><div class="strip-val green" id="stat-income">—</div></div></div>
+      <div class="strip-card"><div class="strip-icon red"><i class="ti ti-arrow-up-right"></i></div><div><div class="strip-label">Total Expenses</div><div class="strip-val red" id="stat-expense">—</div></div></div>
+      <div class="strip-card"><div class="strip-icon navy"><i class="ti ti-wallet"></i></div><div><div class="strip-label">Net Flow</div><div class="strip-val" id="stat-net">—</div></div></div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters-card">
+      <div class="filters-row">
+        <div class="filter-field"><label>FROM DATE</label><input type="date" class="filter-input" id="filter-from"/></div>
+        <div class="filter-field"><label>TO DATE</label><input type="date" class="filter-input" id="filter-to"/></div>
+        <div class="filter-actions">
+          <button class="btn-filter primary" onclick="applyFilters()"><i class="ti ti-filter"></i> Apply</button>
+          <button class="btn-filter ghost"   onclick="resetFilters()"><i class="ti ti-refresh"></i> Reset</button>
+        </div>
+      </div>
+      <div class="type-pills">
+        <span style="font-size:12px;font-weight:600;color:var(--text-3);align-self:center;margin-right:4px;">Type:</span>
+        <button class="pill active"   id="pill-all"      onclick="setTypePill('all',this)"><i class="ti ti-list"></i> All</button>
+        <button class="pill income"   id="pill-income"   onclick="setTypePill('income',this)"><i class="ti ti-arrow-down-left"></i> Income</button>
+        <button class="pill expense"  id="pill-expense"  onclick="setTypePill('expense',this)"><i class="ti ti-arrow-up-right"></i> Expense</button>
+        <button class="pill transfer" id="pill-transfer" onclick="setTypePill('transfer',this)"><i class="ti ti-arrows-right-left"></i> Transfer</button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-hdr"><span class="table-hdr-title">Transactions</span><span class="table-count" id="table-count">— results</span></div>
+      <div id="table-wrap"><div class="empty-state"><i class="ti ti-loader-2"></i><p>Loading transactions…</p></div></div>
+      <div class="pagination" id="pagination" style="display:none;">
+        <span class="pag-info" id="pag-info">—</span>
+        <div class="pag-btns" id="pag-btns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<script src="scripts.js"></script>
+</body>
+</html>

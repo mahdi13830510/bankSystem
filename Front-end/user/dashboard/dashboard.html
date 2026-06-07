@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EliraPay — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon"><i class="ti ti-building-bank"></i></div>
+    <span class="sidebar-logo-text">EliraPay</span>
+  </div>
+  <div class="sidebar-section">Main</div>
+  <a class="nav-item active" href="../../user/dashboard/dashboard.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+  <a class="nav-item" href="#" onclick="openNotifPanel(event)">
+    <i class="ti ti-bell"></i> Notifications
+    <span class="nav-badge" id="notif-nav-badge">0</span>
+  </a>
+  <div class="sidebar-section">Services</div>
+  <a class="nav-item" href="../../user/transfer/transfer.html"><i class="ti ti-arrows-right-left"></i> Transfer Money</a>
+  <a class="nav-item" href="../../user/loan/loan.html"><i class="ti ti-coin"></i> Loans</a>
+  <a class="nav-item" href="../../user/installments/installments.html"><i class="ti ti-receipt"></i> Installments</a>
+  <a class="nav-item" href="../../user/statement/statement.html"><i class="ti ti-file-description"></i> Statement</a>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">--</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading…</div>
+        <div class="user-role">Customer</div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Logout"><i class="ti ti-logout"></i></button>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 id="topbar-greeting">Good morning 👋</h1>
+      <p id="topbar-date">—</p>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn" onclick="openNotifPanel(event)" title="Notifications">
+        <i class="ti ti-bell"></i>
+        <span class="notif-dot" id="notif-dot"></span>
+      </div>
+      <div class="icon-btn" onclick="logout()" title="Logout"><i class="ti ti-logout"></i></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Balance Card -->
+    <div class="balance-card">
+      <div class="balance-top">
+        <div>
+          <div class="balance-label">TOTAL BALANCE</div>
+          <div class="balance-amount"><span class="currency">€</span><span id="balance-amount">—</span></div>
+          <div class="balance-change"><i class="ti ti-trending-up"></i> Across all accounts</div>
+        </div>
+        <div class="card-chip">
+          <i class="ti ti-credit-card"></i>
+          <span id="account-number">•••• ••••</span>
+        </div>
+      </div>
+      <div class="balance-stats">
+        <div>
+          <div class="balance-stat-label">Available</div>
+          <div class="balance-stat-val inc" id="available-balance">—</div>
+        </div>
+        <div>
+          <div class="balance-stat-label">Blocked</div>
+          <div class="balance-stat-val dec" id="blocked-balance">—</div>
+        </div>
+        <div>
+          <div class="balance-stat-label">Account Type</div>
+          <div class="balance-stat-val" id="account-type" style="font-size:13px;">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Services -->
+    <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:1rem;">Services</div>
+    <div class="grid-3" style="margin-bottom:1.5rem;">
+      <a class="service-card delay-1" href="../../user/transfer/transfer.html">
+        <div class="service-icon blue"><i class="ti ti-arrows-right-left"></i></div>
+        <div><div class="service-name">Transfer Money</div><div class="service-desc">Send via card number or IBAN instantly</div></div>
+        <div class="service-arrow"><i class="ti ti-arrow-right"></i></div>
+      </a>
+      <a class="service-card delay-2" href="../../user/loan/loan.html">
+        <div class="service-icon green"><i class="ti ti-coin"></i></div>
+        <div><div class="service-name">Loans</div><div class="service-desc">Request a new loan or track active requests</div></div>
+        <div class="service-arrow"><i class="ti ti-arrow-right"></i></div>
+      </a>
+      <a class="service-card delay-3" href="../../user/installments/installments.html">
+        <div class="service-icon amber"><i class="ti ti-receipt"></i></div>
+        <div><div class="service-name">Installments</div><div class="service-desc">View and pay your active installment plans</div></div>
+        <div class="service-arrow"><i class="ti ti-arrow-right"></i></div>
+      </a>
+    </div>
+
+    <!-- Loan Summary + Installments -->
+    <div class="grid-2">
+      <div class="info-card delay-4">
+        <div class="info-card-header">
+          <div class="info-card-title"><i class="ti ti-coin"></i> Active Loans</div>
+          <a class="section-link" href="../../user/loan/loan.html">View all</a>
+        </div>
+        <div id="loan-list"><div class="empty"><i class="ti ti-loader-2"></i>Loading…</div></div>
+      </div>
+      <div class="info-card delay-5">
+        <div class="info-card-header">
+          <div class="info-card-title"><i class="ti ti-receipt"></i> Installments</div>
+          <a class="section-link" href="../../user/installments/installments.html">View all</a>
+        </div>
+        <div id="installment-list"><div class="empty"><i class="ti ti-loader-2"></i>Loading…</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notifications Panel -->
+<div class="overlay" id="overlay" onclick="closeNotifPanel()"></div>
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-panel-header">
+    <span class="notif-panel-title">Notifications</span>
+    <button class="notif-close" onclick="closeNotifPanel()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="notif-list" id="notif-list"><div class="empty"><i class="ti ti-loader-2"></i>Loading…</div></div>
+  <div class="notif-mark-all"><button class="notif-mark-btn" onclick="markAllRead()">Mark all as read</button></div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="scripts.js"></script>
+</body>
+</html>
