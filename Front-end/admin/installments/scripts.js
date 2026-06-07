@@ -1,6 +1,6 @@
   const access=localStorage.getItem('access_token');
   const refresh=localStorage.getItem('refresh_token');
-  //if(!access) window.location.href='/auth/auth.html';
+  //if(!access) window.location.href='../../auth/auth.html';
   const API={
     OVERDUE:'/installments/admin/overdue/',
     ALL:(q)=>`/installments/admin/?${q}`,
@@ -146,7 +146,7 @@
 
   async function logout(){
     try{await fetch(API.LOGOUT,{method:'POST',headers:H(),body:JSON.stringify({refresh_token:refresh})});}catch{}
-    localStorage.clear();window.location.href='/auth/auth.html';
+    localStorage.clear();window.location.href='../../auth/auth.html';
   }
 
   loadOverdue();

@@ -139,9 +139,9 @@
           setTimeout(() => {
             const role = me.primary_role || 'customer';
             if (role === 'admin' || role === 'manager' || role === 'employee') {
-              window.location.href = '/admin/dashboard/admin-dashboard.html';
+              window.location.href = '../admin/dashboard/admin-dashboard.html';
             } else {
-              window.location.href = '/user/dashboard/dashboard.html';
+              window.location.href = '../user/dashboard/dashboard.html';
             }
           }, 800);
         } catch {

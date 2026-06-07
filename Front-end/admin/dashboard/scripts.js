@@ -1,6 +1,6 @@
   const access  = localStorage.getItem('access_token');
   const refresh = localStorage.getItem('refresh_token');
-  //if (!access) window.location.href = '/auth/auth.html';
+  //if (!access) window.location.href = '../../auth/auth.html';
 
   const API = {
     DASHBOARD: '/dashboard/overview/',
@@ -214,7 +214,7 @@
   async function logout() {
     try { await fetch(API.LOGOUT,{method:'POST',headers:authHeaders(),body:JSON.stringify({refresh_token:refresh})}); } catch {}
     localStorage.clear();
-    window.location.href='/auth/auth.html';
+    window.location.href='../../auth/auth.html';
   }
 
   loadAll();
