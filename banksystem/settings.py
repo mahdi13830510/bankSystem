@@ -3,7 +3,7 @@ from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-$3#pw^jv5d85ih-w7ixvtn^(--^b&r(oq@e9oa0a^a)pn@b126'
+SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-me-in-production")
 SESSION_EXPIRATION_MINUTES = 10
 DEBUG = config("DEBUG", cast=bool)
 
@@ -31,12 +31,17 @@ INSTALLED_APPS = [
     "apps.fraud",
     "apps.notifications",
     "apps.auditlogs",
-    "apps.ai_agent"
+    "apps.dashboard",
+    "apps.ai_agent",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -77,6 +82,7 @@ REST_FRAMEWORK = {
 }
 
 STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
