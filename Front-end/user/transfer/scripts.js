@@ -7,7 +7,7 @@
 
   const access  = localStorage.getItem('access_token');
   const refresh = localStorage.getItem('refresh_token');
-  //if (!access) window.location.href = '../../auth/auth.html';
+  if (!access) window.location.href = '../../auth/auth.html';
   const H = () => ({ 'Content-Type':'application/json','Authorization':`Bearer ${access}` });
 
   const userName = localStorage.getItem('user_name')||'';
