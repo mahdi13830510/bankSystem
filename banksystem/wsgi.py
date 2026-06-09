@@ -1,16 +1,12 @@
-"""
-WSGI config for banksystem project.
-
-It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/6.0/howto/deployment/wsgi/
-"""
-
 import os
+from pathlib import Path
 
 from django.core.wsgi import get_wsgi_application
+from whitenoise import WhiteNoise
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'banksystem.settings')
 
-application = get_wsgi_application()
+_django_app = get_wsgi_application()
+
+FRONTEND_DIR = str(Path(__file__).resolve().parent.parent / 'Front-end')
+application = WhiteNoise(_django_app, root=FRONTEND_DIR, prefix='fe')
