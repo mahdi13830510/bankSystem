@@ -1,4 +1,7 @@
 Django==6.0.5
+whitenoise==6.9.0
+requests>=2.32
+Pillow>=11.0
 djangorestframework==3.17.1
 djangorestframework-simplejwt==5.5.1
 drf-yasg==1.21.10
