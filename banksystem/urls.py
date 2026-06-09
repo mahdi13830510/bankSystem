@@ -33,6 +33,14 @@ urlpatterns = [
     # ── AI agent ─────────────────────────────────────────────────────────────
     path("api/ai/", include("apps.ai_agent.urls")),
 
-    # ── Frontend static files (works in both dev and prod) ────────────────────
-    re_path(r'^fe/(?P<path>.*)$', serve, {'document_root': settings.BASE_DIR / 'Front-end'}),
 ]
+
+# Dev only — in production WhiteNoise WSGI intercepts /fe/ before Django sees it
+if settings.DEBUG:
+    urlpatterns += [
+        re_path(
+            r'^fe/(?P<path>[\w\-./]+\.(?:html|css|js|png|jpg|svg|ico|woff2?)?)$',
+            serve,
+            {'document_root': settings.BASE_DIR / 'Front-end'},
+        ),
+    ]
