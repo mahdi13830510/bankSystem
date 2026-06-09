@@ -1,11 +1,11 @@
   const access  = localStorage.getItem('access_token');
   const refresh = localStorage.getItem('refresh_token');
-  //if (!access) window.location.href = '../../auth/auth.html';
+  if (!access) window.location.href = '../../auth/auth.html';
 
   const API = {
-    LIST:    (q) => `/transactions/admin/?${q}`,
-    DETAIL:  (id)=> `/transactions/admin/${id}/`,
-    REVERSE: (id)=> `/transactions/admin/${id}/reverse/`,
+    LIST:    (q) => `/api/transactions/admin/?${q}`,
+    DETAIL:  (id)=> `/api/transactions/admin/${id}/`,
+    REVERSE: (id)=> `/api/transactions/admin/${id}/reverse/`,
     LOGOUT: '/api/v1/auth/logout/',
   };
   const H = () => ({'Content-Type':'application/json','Authorization':`Bearer ${access}`});
