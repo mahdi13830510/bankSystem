@@ -3,7 +3,7 @@ from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-me-in-production")
+SECRET_KEY = config("SECRET_KEY")
 SESSION_EXPIRATION_MINUTES = 10
 DEBUG = config("DEBUG", cast=bool)
 
