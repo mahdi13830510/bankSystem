@@ -146,7 +146,7 @@
           }, 800);
         } catch {
           // fallback: go to customer dashboard
-          setTimeout(() => window.location.href = '/dashboard.html', 800);
+          setTimeout(() => window.location.href = '../user/dashboard/dashboard.html', 800);
         }
       } else {
         showError(data.detail || data.message || 'Invalid or expired OTP.');
