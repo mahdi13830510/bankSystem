@@ -49,14 +49,14 @@ class TransactionDetailSerializer(serializers.ModelSerializer):
 
 class CardTransferSerializer(serializers.Serializer):
     source_account_id = serializers.IntegerField()
-    destination_account_id = serializers.UUIDField()
+    destination_card_number = serializers.CharField(max_length=20)
     amount = serializers.DecimalField(max_digits=18, decimal_places=2)
     description = serializers.CharField(required=False, allow_blank=True)
 
 
 class IbanTransferSerializer(serializers.Serializer):
-    source_account_id = serializers.UUIDField()
-    destination_iban = serializers.CharField()
+    source_account_id = serializers.IntegerField()
+    destination_iban = serializers.CharField(max_length=34)
     amount = serializers.DecimalField(max_digits=18, decimal_places=2)
 
 

@@ -100,11 +100,11 @@
     if(currentMethod==='card'){
       const dest=document.getElementById('card-dest').value.replace(/\s/g,'');
       endpoint=API.CARD_TRANSFER;
-      payload={ source_account: accountId, destination_card: dest, amount, description: desc };
+      payload={ source_account_id: parseInt(accountId), destination_card_number: dest, amount, description: desc };
     } else {
       const dest=document.getElementById('iban-dest').value.replace(/\s/g,'');
       endpoint=API.IBAN_TRANSFER;
-      payload={ source_account: accountId, destination_iban: dest, amount, description: desc };
+      payload={ source_account_id: parseInt(accountId), destination_iban: dest, amount, description: desc };
     }
 
     try{

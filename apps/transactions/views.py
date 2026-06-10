@@ -40,7 +40,7 @@ class CardTransferView(APIView):
         )
         destination = get_object_or_404(
             Account,
-            id=serializer.validated_data["destination_account_id"],
+            account_number=serializer.validated_data["destination_card_number"],
         )
 
         txn = TransactionService.card_transfer(
