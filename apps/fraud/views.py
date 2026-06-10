@@ -1,3 +1,4 @@
+from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -5,6 +6,7 @@ from .models import FraudReport
 
 
 class FraudReportListView(APIView):
+    permission_classes = [IsAdminUser]
 
     def get(self, request):
         reports = FraudReport.objects.order_by("-created_at", "-pk")
