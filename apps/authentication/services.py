@@ -1,10 +1,7 @@
 import jwt
-import logging
 import random
 
 from datetime import timedelta
-
-logger = logging.getLogger(__name__)
 
 from django.conf import settings
 from django.utils import timezone
@@ -64,8 +61,8 @@ class AuthService:
             code=code,
         )
 
-        # DEV: log OTP to terminal (replace with SMS provider when ready)
-        logger.warning("[DEV OTP] phone=%s  code=%s", user.phone, code)
+        if settings.DEBUG:
+            print(f"[DEV OTP] phone={user.phone}  code={code}")  # noqa: T201
 
         AuditLogService.info(
             actor=user,
