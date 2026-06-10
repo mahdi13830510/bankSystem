@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from rest_framework import serializers
 from .models import Account, AccountType, AccountStatus, CurrencyType
 
@@ -114,14 +116,14 @@ class AdminOpenAccountSerializer(serializers.Serializer):
 
 class AmountSerializer(serializers.Serializer):
     amount = serializers.DecimalField(
-        max_digits=18, decimal_places=2, min_value=0.01
+        max_digits=18, decimal_places=2, min_value=Decimal("0.01")
     )
 
 
 class AdminBalanceAdjustSerializer(serializers.Serializer):
     """admin: block / unblock balance """
     amount = serializers.DecimalField(
-        max_digits=18, decimal_places=2, min_value=0.01
+        max_digits=18, decimal_places=2, min_value=Decimal("0.01")
     )
     reason = serializers.CharField(
         max_length=500, required=False, allow_blank=True
