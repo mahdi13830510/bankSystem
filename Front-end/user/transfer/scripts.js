@@ -90,12 +90,12 @@
     const spin=document.getElementById('confirm-spin');
     const icon=document.getElementById('confirm-icon');
     const txt=document.getElementById('confirm-text');
+    if(!accountId){ closeConfirm(); toast('No bank account found. Please contact support.'); return; }
+
     btn.disabled=true;spin.style.display='block';icon.style.display='none';txt.textContent='Sending…';
 
     const amount=parseFloat(document.getElementById('amount').value);
     const desc=document.getElementById('description').value.trim();
-
-    if(!accountId){ closeConfirm(); toast('No bank account found. Please contact support.'); return; }
 
     // Backend expects: source_account_id (int), destination_card_number or destination_iban, amount, description
     let endpoint, payload;
