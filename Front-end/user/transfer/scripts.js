@@ -95,7 +95,9 @@
     const amount=parseFloat(document.getElementById('amount').value);
     const desc=document.getElementById('description').value.trim();
 
-    // Backend expects: source_account (id), destination_card or destination_iban, amount, description
+    if(!accountId){ closeConfirm(); toast('No bank account found. Please contact support.'); return; }
+
+    // Backend expects: source_account_id (int), destination_card_number or destination_iban, amount, description
     let endpoint, payload;
     if(currentMethod==='card'){
       const dest=document.getElementById('card-dest').value.replace(/\s/g,'');
@@ -126,7 +128,7 @@
     document.getElementById('form-body').style.display='none';
     document.getElementById('form-footer').style.display='none';
     document.getElementById('success-sub').textContent=`€${Number(amount).toFixed(2)} has been sent successfully.`;
-    const dest=currentMethod==='card'?payload.destination_card:payload.destination_iban;
+    const dest=currentMethod==='card'?payload.destination_card_number:payload.destination_iban;
     document.getElementById('success-detail').innerHTML=`
       <div class="success-detail-row"><span>Method</span><span>${currentMethod==='card'?'Card Transfer':'IBAN Transfer'}</span></div>
       <div class="success-detail-row"><span>To</span><span>${dest}</span></div>
